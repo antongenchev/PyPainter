@@ -22,6 +22,13 @@ def qpixmap_to_cv2(pixmap: QPixmap) -> np.ndarray:
     """Convert QPixmap to OpenCV (cv2) image."""
     return qimage_to_cv2(qpixmap_to_qimage(pixmap))
 
+def cv2_to_qpixmap(cv_image: np.ndarray) -> QPixmap:
+    """Converts a cv2 image (numpy array) to a QPixmap."""
+    rgb_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    height, width, channel = rgb_image.shape
+    qimage = QImage(rgb_image.data, width, height, channel * width, QImage.Format_RGB888)
+    return QPixmap.fromImage(qimage)
+
 def create_svg_icon(icon_path:str, size: Tuple[int, int]=(24, 24)):
         '''
         Helper function to create QIcon from SVG file path
