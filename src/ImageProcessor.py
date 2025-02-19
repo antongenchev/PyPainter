@@ -11,14 +11,15 @@ from typing import List
 from scipy.interpolate import CubicSpline
 from src.ZoomableLabel import ZoomableLabel
 from src.ZoomableWidget import ZoomableWidget
-from src.Layer import Layer, FakeLayer
+from src.Layer import FakeLayer
+from src.Layers.Layer import Layer
+from src.Layers.LayerList import LayerList
 from src.DrawableElement import DrawableElement
 from src.config import config
 
 from src.ImageProcessingToolSetting import ImageProcessingToolSetting
 # Import ImageProcessingTools
 from src.ImageProcessingTools.ImageProcessingTool import ImageProcessingTool
-from src.ImageProcessingTools.PencilTool import PencilTool
 
 class ImageProcessor(QWidget):
 
@@ -35,7 +36,8 @@ class ImageProcessor(QWidget):
         self.zoomable_label = zoomable_widget.zoomable_label
         self.current_tool = None
         self.tool_classes = {}
-        self.layers:List[Layer] = [] # All the layers
+        # self.layers:List[Layer] = [] # All the layers
+        self.layer_list = LayerList(self)
         self.fake_layer:FakeLayer = None # layer for visualising stuff not part of what is drawn
         self.active_layer_index = 0 # the index of the active layer
         self.final_image = None # The final image after adding all the layers together
@@ -138,14 +140,14 @@ class ImageProcessor(QWidget):
         '''
         Handle signals from the ZoomableLable about a new image
         '''
-        self.layers = [] # clear the previous layers
+        self.layer_list.delete_all_layers()
         image = copy.deepcopy(self.zoomable_label.original_image)
         # Add an alpha channel in case there isn't already one
         if image.shape[2] == 3:
             alpha_channel = np.full((image.shape[0], image.shape[1], 1), 255, dtype=np.uint8)
             image = np.concatenate((image, alpha_channel), axis=2)
         # Add a layer with the image and set the active layer index
-        self.layers.append(Layer(self, image))
+        self.layer_list.add_layer(Layer(self, image))
         self.active_layer_index = 0
         # Initialize the fake layer with a zeroed image)
         empty_image = np.zeros((image.shape[0], image.shape[1], 4), dtype=np.uint8)
@@ -157,49 +159,22 @@ class ImageProcessor(QWidget):
     # Layer methods #
     #################
 
-    def add_layer(self, image=None):
-        layer = Layer(image=image)
-        self.layers.append(layer)
-        self.active_layer_index = len(self.layers) - 1
-
-    def remove_layer(self, index):
-        if 0 <= index < len(self.layers):
-            del self.layers[index]
-            self.active_layer_index = min(self.active_layer_index, len(self.layers) - 1)
-
-    def set_active_layer(self, index):
-        if 0 <= index < len(self.layers):
-            self.active_layer_index = index
-
-    def toggle_layer_visibility(self, index):
-        if 0 <= index < len(self.layers):
-            self.layers[index].toggle_visibility()
+    @property
+    def active_layer(self):
+        return self.layer_list[self.layer_list.active_layer_idx]
 
     def render_layers(self):
         '''
         Render all layers
         '''
         self.final_image = None
-        for layer in self.layers:
+        for layer in self.layer_list:
             if self.final_image is None:
                 self.final_image = layer.final_image
                 continue
             self.final_image = self.overlay_images(self.final_image, layer.final_image)
 
         self.zoomable_label.update_transformed_image(self.final_image)
-
-    def render_layer(self, index:int) -> None:
-        '''
-        Render the layer with index `index`.
-        That is update the final_image of the layer
-
-        Parameters:
-            index: the index of the layer in self.layers
-        '''
-        layer = self.layers[index]
-        for drawable_element in layer.elements:
-            self.render_element(drawable_element, redraw=False)
-            # add element to layer
 
     def overlay_images(self, image_bottom:np.ndarray, image_top:np.ndarray) -> np.ndarray:
         '''
@@ -236,9 +211,9 @@ class ImageProcessor(QWidget):
 
     def add_element(self, drawable_element:DrawableElement):
         # Add the element to the current layer
-        self.layers[self.active_layer_index].add_element(drawable_element)
+        self.active_layer.add_element(drawable_element)
         # Add the layers together to get the final image
-        self.final_image = self.layers[self.active_layer_index].final_image # TODO implement multiple layers logic
+        self.final_image = self.active_layer.final_image # TODO implement multiple layers logic
         self.update_zoomable_label()
 
     def apply_element_transformation(self, drawable_element:DrawableElement) -> None:
@@ -250,7 +225,7 @@ class ImageProcessor(QWidget):
                 active layer.
         '''
         # Update the active layer
-        self.layers[self.active_layer_index].rerender_after_element_update(drawable_element)
+        self.active_layer.rerender_after_element_update(drawable_element)
         # Update the final image
         self.render_layers()
 
@@ -280,4 +255,4 @@ class ImageProcessor(QWidget):
         image[:, :, 3] = ((overlay_alpha + (image[:, :, 3] / 255) * (1.0 - overlay_alpha)) * 255).astype(np.uint8)
 
     def get_touch_element(self, x, y, r) -> DrawableElement:
-        return self.layers[self.active_layer_index].get_touched_element(x, y, r)
+        return self.active_layer.get_touched_element(x, y, r)

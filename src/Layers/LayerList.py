@@ -4,13 +4,10 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QListWidget,
                              QMenu, QAction)
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from src.Layer import Layer
+from src.Layers.Layer import Layer
 from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
-import numpy as np
 import cv2
 import os
-from typing import Tuple, List, Any
-from datetime import datetime
 
 class LayerList(QWidget):
     def __init__(self, image_processor):
@@ -20,9 +17,16 @@ class LayerList(QWidget):
         self.resource_path = '/home/anton-genchev/projects/Screenshot-utility/resources/layerlist'
 
         self.layer_list = []
+        self.active_layer_idx: int = None
 
         self.initGUI()
         self.add_layer_in_gui(Layer(image_processor, cv2.imread('/home/anton-genchev/Desktop/papers/hq720.jpg')))
+
+    def __iter__(self):
+        return iter(self.layer_list)
+
+    def __getitem__(self, index):
+        return self.layer_list[index]
 
     def initGUI(self) -> None:
         '''
@@ -182,13 +186,26 @@ class LayerList(QWidget):
             layer (Layer): The layer used to say "below that layer".
         '''
 
+    def delete_all_layers(self) -> None:
+        '''
+        Delete all the layers.
+        '''
+        self.layer_list = []
+        self.active_layer_idx = None
 
+    def add_layer(self, layer: Layer, set_active: bool = False) -> None:
+        '''
+        Add a layer to the layer list. The new layer will be the topmost layer.
 
+        Args:
+            layer (Layer): The layer to be added.
+            set_active (bool): Whether to set the new layer as the currently active layer.
+        '''
+        self.layer_list.append(layer)
 
-
-
-
-
+        if set_active or self.active_layer_idx is None:
+            # Set the new layer to be the active layer
+            self.active_layer_idx = len(self.layer_list) - 1
 
 
 
