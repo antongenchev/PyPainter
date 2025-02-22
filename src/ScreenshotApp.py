@@ -20,7 +20,6 @@ class ScreenshotApp(QWidget):
         self.zoomable_widget = ZoomableWidget(self)
         self.tool_settings_widget = ImageProcessingToolSetting()
         self.image_processor = ImageProcessor(self.zoomable_widget, self.tool_settings_widget)
-        self.layer_list = LayerList(self.image_processor)
 
         self.zoomable_widget.zoomable_label.draw_signal.connect(self.image_processor.on_mouse_move)
         self.zoomable_widget.zoomable_label.start_draw_signal.connect(self.image_processor.on_mouse_down)
@@ -61,7 +60,7 @@ class ScreenshotApp(QWidget):
         self.layout.addWidget(self.tool_settings_widget)
 
         # Layer list GUI
-        self.layout.addWidget(self.layer_list)
+        self.layout.addWidget(self.image_processor.layer_list)
 
         # Menu for changing the screenshot selection
         grid_layout = QGridLayout()

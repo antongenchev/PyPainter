@@ -10,9 +10,8 @@ import cv2
 import os
 
 class LayerList(QWidget):
-    def __init__(self, image_processor):
+    def __init__(self):
         super().__init__()
-        self.image_processor = image_processor
 
         self.resource_path = '/home/anton-genchev/projects/Screenshot-utility/resources/layerlist'
 
@@ -20,7 +19,7 @@ class LayerList(QWidget):
         self.active_layer_idx: int = None
 
         self.initGUI()
-        self.add_layer_in_gui(Layer(image_processor, cv2.imread('/home/anton-genchev/Desktop/papers/hq720.jpg')))
+        self.add_layer_in_gui(Layer(cv2.imread('/home/anton-genchev/Desktop/papers/hq720.jpg')))
 
     def __iter__(self):
         return iter(self.layer_list)
@@ -129,7 +128,7 @@ class LayerList(QWidget):
         Handle adding a new layer 
         '''
         # Create the new layer and add it to the list of layers
-        new_layer = Layer(self.image_processor, cv2.imread(f'{self.resource_path}/Space Probes.jpeg'))
+        new_layer = Layer(cv2.imread(f'{self.resource_path}/Space Probes.jpeg'))
         self.layer_list.append(new_layer)
 
         # Add the new layer to the layer list gui

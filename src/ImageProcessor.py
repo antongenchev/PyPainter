@@ -11,7 +11,7 @@ from typing import List
 from scipy.interpolate import CubicSpline
 from src.ZoomableLabel import ZoomableLabel
 from src.ZoomableWidget import ZoomableWidget
-from src.Layer import FakeLayer
+from src.Layers.Layer import FakeLayer
 from src.Layers.Layer import Layer
 from src.Layers.LayerList import LayerList
 from src.DrawableElement import DrawableElement
@@ -36,8 +36,7 @@ class ImageProcessor(QWidget):
         self.zoomable_label = zoomable_widget.zoomable_label
         self.current_tool = None
         self.tool_classes = {}
-        # self.layers:List[Layer] = [] # All the layers
-        self.layer_list = LayerList(self)
+        self.layer_list = LayerList()
         self.fake_layer:FakeLayer = None # layer for visualising stuff not part of what is drawn
         self.active_layer_index = 0 # the index of the active layer
         self.final_image = None # The final image after adding all the layers together
@@ -147,11 +146,11 @@ class ImageProcessor(QWidget):
             alpha_channel = np.full((image.shape[0], image.shape[1], 1), 255, dtype=np.uint8)
             image = np.concatenate((image, alpha_channel), axis=2)
         # Add a layer with the image and set the active layer index
-        self.layer_list.add_layer(Layer(self, image))
+        self.layer_list.add_layer(Layer(image))
         self.active_layer_index = 0
         # Initialize the fake layer with a zeroed image)
         empty_image = np.zeros((image.shape[0], image.shape[1], 4), dtype=np.uint8)
-        self.fake_layer = FakeLayer(self, image=empty_image)
+        self.fake_layer = FakeLayer(image=empty_image)
         # Initialise the final image
         self.final_image = copy.deepcopy(image)
 
@@ -160,8 +159,24 @@ class ImageProcessor(QWidget):
     #################
 
     @property
-    def active_layer(self):
+    def active_layer(self) -> Layer:
         return self.layer_list[self.layer_list.active_layer_idx]
+
+    def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
+        '''
+        Render part of a layer by adding the drawable elements together.
+
+        Args:
+            layer (Layer): The layer which will be partially rendered.
+            start_index (int): The index of the first drawable element to draw.
+            end_index (int): The index of the last drawable element to draw.
+        '''
+        # Create a new image on which we will draw
+        image = np.zeros_like(self.final_image)
+        # Draw the drawable elements on top of the image
+        for i in range(start_index, end_index):
+            self.overlay_element_on_image(image, layer.elements[i])
+        return image
 
     def render_layers(self):
         '''
@@ -212,20 +227,38 @@ class ImageProcessor(QWidget):
     def add_element(self, drawable_element:DrawableElement):
         # Add the element to the current layer
         self.active_layer.add_element(drawable_element)
+        self.render_element(drawable_element, redraw=False) # render the drawable element
+        self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
         # Add the layers together to get the final image
         self.final_image = self.active_layer.final_image # TODO implement multiple layers logic
         self.update_zoomable_label()
 
     def apply_element_transformation(self, drawable_element:DrawableElement) -> None:
         '''
-        This function applies the transformation of a drawable_element and redraws the layer which contains it
+        This function applies the transformation of a drawable_element and redraws the layer which contains it.
+        The drawable element must be in the active layer.
 
-        Parameters:
-            drawable_element: the drawable_element. It must be in the elements list of the currently
-                active layer.
+        Args:
+            drawable_element (DrawableElement): The drawable_element. It must be in the elements list of the
+                currently active layer.
         '''
-        # Update the active layer
-        self.active_layer.rerender_after_element_update(drawable_element)
+        # Find the index of the updated drawable element
+        element_index = self.active_layer.get_element_index(drawable_element)
+
+        # Render everything below the chosen drawable element
+        image_below = self.render_partial_layer(self.active_layer, 0, end_index=element_index)
+
+        # Render everything above the chosen drawable element
+        image_above = self.render_partial_layer(self.active_layer,
+                                                start_index=element_index,
+                                                end_index=len(self.active_layer.elements))
+
+        # Combine image_below, the drawable element, and image_above to get the final image
+        self.active_layer.final_image = copy.deepcopy(self.active_layer.image)
+        self.active_layer.final_image = self.overlay_images(self.active_layer.final_image, image_below)
+        self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
+        self.active_layer.final_image = self.overlay_images(self.active_layer.final_image, image_above)
+
         # Update the final image
         self.render_layers()
 
