@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QListWidget,
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from src.Layers.Layer import Layer
+from src.Layers.LayerListGUI import LayerListGUI
 from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
 import cv2
 import os
@@ -18,140 +19,13 @@ class LayerList(QWidget):
         self.layer_list = []
         self.active_layer_idx: int = None
 
-        self.initGUI()
-        self.add_layer_in_gui(Layer(cv2.imread('/home/anton-genchev/Desktop/papers/hq720.jpg')))
+        self.gui = LayerListGUI()
 
     def __iter__(self):
         return iter(self.layer_list)
 
     def __getitem__(self, index):
         return self.layer_list[index]
-
-    def initGUI(self) -> None:
-        '''
-        Initialise the gui for the layer list.
-        '''
-        layout = QVBoxLayout()
-        layout.setSpacing(10)
-
-        # Menu with Buttons
-        menu_layout = QHBoxLayout()
-        button_add = QPushButton("+")
-        button_add.setFixedSize(30, 30)
-        button_add.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 18px;
-                border-radius: 15px;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
-        button_add.clicked.connect(lambda: self.on_button_add())
-        menu_layout.addWidget(button_add)
-        menu_layout.addStretch()
-
-        # Scroll Area
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFixedSize(140, 200)
-        self.scroll_container = QWidget()
-        self.scroll_layout = QVBoxLayout(self.scroll_container)
-        self.scroll_layout.setAlignment(Qt.AlignTop)
-        self.scroll_area.setWidget(self.scroll_container)
-        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        layout.addLayout(menu_layout)
-        layout.addWidget(self.scroll_area)
-        self.setLayout(layout)
-
-        self.icon_eye_enable = create_svg_icon(os.path.join(self.resource_path, 'eye_enable.svg'))
-        self.icon_eye_disable = create_svg_icon(os.path.join(self.resource_path, 'eye_disable.svg'))
-
-    def add_layer_in_gui(self, layer: Layer) -> None:
-        '''
-        Add a clickable image to the GUI of the LayerList to represent
-        a single layer.
-
-        Args:
-            layer (Layer): The layer to be added in the gui.
-        '''
-        # Get the qpixmap image representing the layer
-        qpixmap = cv2_to_qpixmap(layer.final_image).scaled(100, 75, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
-        item_widget = QWidget()
-        item_layout = QGridLayout(item_widget)
-        item_layout.setContentsMargins(0, 0, 0, 0)
-        item_layout.setSpacing(0)
-
-        # Clickable Image Label
-        image_label = ClickableLabel(layer_list=self, layer=layer)
-        image_label.setPixmap(qpixmap)
-        image_label.setStyleSheet("border: 4px solid #ccc; border-radius: 3px;")  # Optional styling
-        image_label.clicked.connect(lambda: self.on_image_clicked())  # Connect click event
-
-        # Small Button (e.g., "Remove" or "Options")
-        button_eye = QPushButton()
-        button_eye.setIcon(self.icon_eye_enable)
-        button_eye.setIconSize(QSize(24, 24))
-        button_eye.setFixedSize(QSize(36, 36))
-        button_eye.clicked.connect(lambda: self.on_eye_clicked(button_eye, layer))
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_eye.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-            }
-            QPushButton::hover {
-                background: rgba(255, 255, 255, 30);
-                border-radius: 18px;
-            }
-        """)
-        button_layout.addWidget(button_eye)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Add items to layout
-        item_layout.addWidget(image_label, 0, 0, Qt.AlignTop | Qt.AlignRight)  # Add image below
-        item_layout.addLayout(button_layout, 0, 0, Qt.AlignTop | Qt.AlignRight)  # Add button at top
-        item_widget.setLayout(item_layout)
-
-        # Add to scroll layout
-        self.scroll_layout.insertWidget(0, item_widget)
-
-    def on_button_add(self):
-        '''
-        Handle adding a new layer 
-        '''
-        # Create the new layer and add it to the list of layers
-        new_layer = Layer(cv2.imread(f'{self.resource_path}/Space Probes.jpeg'))
-        self.layer_list.append(new_layer)
-
-        # Add the new layer to the layer list gui
-        self.add_layer_in_gui(new_layer)
-
-    def on_image_clicked(self):
-        """Handles image click events."""
-        print(f"Image clicked!")
-
-    def on_eye_clicked(self, button_eye: QPushButton, layer: Layer) -> None:
-        '''
-        Handles clicks on the eye button. Toggles the visiblity of the layer.
-
-        Args:
-            button_eye (QPushButton): The button with the eye. The icon of this button
-                will be updated.
-            layer (Layer): The layer corresponding to the eye button clicked
-        '''
-        layer.toggle_visibility()
-        if layer.visible:
-            button_eye.setIcon(self.icon_eye_enable)
-        else:
-            button_eye.setIcon(self.icon_eye_disable)
 
     def on_delete_layer(self, layer: Layer) -> None:
         '''
@@ -206,7 +80,23 @@ class LayerList(QWidget):
             # Set the new layer to be the active layer
             self.active_layer_idx = len(self.layer_list) - 1
 
+        # Inform the GUI about the added layer
+        self.gui.add_layer_in_gui(layer)
 
+    def set_layer_visibility(self, layer: Layer, is_visible: bool):
+        print('[LayerList] Set layer visibility')
+        layer.visible = is_visible
+
+    def set_active_layer(self, layer: Layer):
+        '''
+        Set the active layer.
+
+        Args:
+            layer (Layer): The new active layer to be set.
+        '''
+        previously_active_layer = self.layer_list[self.active_layer_idx]
+        self.active_layer_idx = next((i for i, l in enumerate(self.layer_list) if l is layer))
+        self.gui.set_active_layer_in_gui(layer, previously_active_layer)
 
 
 class ClickableLabel(QLabel):

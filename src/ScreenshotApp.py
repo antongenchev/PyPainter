@@ -60,7 +60,7 @@ class ScreenshotApp(QWidget):
         self.layout.addWidget(self.tool_settings_widget)
 
         # Layer list GUI
-        self.layout.addWidget(self.image_processor.layer_list)
+        self.layout.addWidget(self.image_processor.layer_list.gui)
 
         # Menu for changing the screenshot selection
         grid_layout = QGridLayout()

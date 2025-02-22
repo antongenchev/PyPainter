@@ -5,12 +5,20 @@ import copy
 from src.DrawableElement import DrawableElement
 
 class Layer:
+
+    _id_counter = 0 # Class variable to ensure unique IDs.
+
     def __init__(self, image=None, visible=True):
         self.image = image # The starting image on which we draw
         self.final_image = copy.deepcopy(image)
         self.visible = visible # Is the layer visible
         self.drawing_enabled = False
         self.elements:List[DrawableElement] = []
+
+        # Assign a unqiue id to the layer
+        self.id = Layer._id_counter
+        Layer._id_counter += 1
+        print('layer_id', self.id)
 
     def toggle_visibility(self):
         self.visible = not self.visible
@@ -54,6 +62,7 @@ class Layer:
             DrawablElement: return the topmost drawable element that was clicked.
                 If there is no such element return None
         '''
+        print('[Layer] get_touched_element', self)
         for element in reversed(self.elements):
             if element.is_touched(x, y, r):
                 return element

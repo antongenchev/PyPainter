@@ -7,7 +7,7 @@ import numpy as np
 from enum import IntEnum, auto
 import importlib
 import copy
-from typing import List
+from typing import List, Tuple
 from scipy.interpolate import CubicSpline
 from src.ZoomableLabel import ZoomableLabel
 from src.ZoomableWidget import ZoomableWidget
@@ -39,9 +39,14 @@ class ImageProcessor(QWidget):
         self.layer_list = LayerList()
         self.fake_layer:FakeLayer = None # layer for visualising stuff not part of what is drawn
         self.active_layer_index = 0 # the index of the active layer
+
         self.final_image = None # The final image after adding all the layers together
+        self.canvas_shape: Tuple[int, int] = None # The shape of the layers, image, etc. but w/o 3rd term
 
         self.image_processing_tool_setting = image_processing_tool_setting
+
+        # Connect the signals from different gui parts
+        self.connect_signals()
 
         self.initUI()
 
@@ -59,6 +64,14 @@ class ImageProcessor(QWidget):
             layout.addWidget(tool_widget)
 
         self.setLayout(layout)
+
+    def connect_signals(self):
+        '''
+        Connect the signals / events coming from GUI parts to methods of the image processort.
+        '''
+        self.layer_list.gui.layer_added.connect(self.add_layer)
+        self.layer_list.gui.layer_visibility_toggled.connect(self.set_layer_visibility)
+        self.layer_list.gui.layer_selected.connect(self.set_active_layer)
 
     def update_zoomable_label(self):
         '''
@@ -141,18 +154,26 @@ class ImageProcessor(QWidget):
         '''
         self.layer_list.delete_all_layers()
         image = copy.deepcopy(self.zoomable_label.original_image)
+
+        # Get the new canvas size
+        self.canvas_shape = (image.shape[0], image.shape[1])
+
         # Add an alpha channel in case there isn't already one
         if image.shape[2] == 3:
-            alpha_channel = np.full((image.shape[0], image.shape[1], 1), 255, dtype=np.uint8)
+            alpha_channel = np.full((*self.canvas_shape, 1), 255, dtype=np.uint8)
             image = np.concatenate((image, alpha_channel), axis=2)
+
         # Add a layer with the image and set the active layer index
         self.layer_list.add_layer(Layer(image))
         self.active_layer_index = 0
+
         # Initialize the fake layer with a zeroed image)
-        empty_image = np.zeros((image.shape[0], image.shape[1], 4), dtype=np.uint8)
+        empty_image = np.zeros((*self.canvas_shape, 4), dtype=np.uint8)
         self.fake_layer = FakeLayer(image=empty_image)
+
         # Initialise the final image
         self.final_image = copy.deepcopy(image)
+
 
     #################
     # Layer methods #
@@ -161,6 +182,33 @@ class ImageProcessor(QWidget):
     @property
     def active_layer(self) -> Layer:
         return self.layer_list[self.layer_list.active_layer_idx]
+
+    def add_layer(self):
+        '''
+        Add a new layer to the top of the layer list.
+        '''
+        print('[ImageProcessor] add_layer')
+        self.layer_list.add_layer(self.create_empty_layer())
+
+    def create_empty_layer(self) -> Layer:
+        '''
+        Create an empty layer. That is a layer with no drawable elements and a fully black
+        and transparent final image.
+        '''
+        return Layer(np.zeros((*self.canvas_shape, 4), dtype=np.uint8))
+
+    def set_layer_visibility(self, layer: Layer, is_visible: bool):
+        print('[ImageProcessor] Set layer visibility')
+        self.layer_list.set_layer_visibility(layer, is_visible)
+
+    def set_active_layer(self, layer: Layer):
+        '''
+        Set the active layer.
+
+        Args:
+            layer (Layer): The new active layer to be set.
+        '''
+        self.layer_list.set_active_layer(layer)
 
     def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
         '''
@@ -183,7 +231,7 @@ class ImageProcessor(QWidget):
         Render all layers
         '''
         self.final_image = None
-        for layer in self.layer_list:
+        for layer in (l for l in self.layer_list if l.visible):
             if self.final_image is None:
                 self.final_image = layer.final_image
                 continue
