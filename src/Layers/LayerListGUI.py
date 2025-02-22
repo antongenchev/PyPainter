@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from src.Layers.Layer import Layer
 from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
 from collections import defaultdict
+from typing import Optional
 import cv2
 import os
 
@@ -126,6 +127,7 @@ class LayerListGUI(QWidget):
 
         # Add widgets to the gui dictionary for controlling later
         self.gui_mapping[layer.id]['image_label'] = image_label
+        self.gui_mapping[layer.id]['item_widget'] = item_widget
 
         # Add to scroll layout
         self.scroll_layout.insertWidget(0, item_widget)
@@ -137,6 +139,22 @@ class LayerListGUI(QWidget):
         print('[LayerListGUI] Set active layer')
         self.gui_mapping[previous_active_layer.id]['image_label'] .setStyleSheet("border: 4px solid #ccc; border-radius: 3px;")
         self.gui_mapping[new_active_layer.id]['image_label'] .setStyleSheet("border: 4px solid #aaa; border-radius: 5px;")
+
+    def delete_layer_in_gui(self, layer: Layer):
+        '''
+        Delete a layer.
+
+        Args:
+            layer (Layer): The layer to be deleted.
+        '''
+        # Delete all the widgets associated with the layer        
+        item_widget = self.gui_mapping[layer.id]['item_widget']
+        self.scroll_layout.removeWidget(item_widget)
+        item_widget.setParent(None)
+        item_widget.deleteLater()
+
+        # Delete from the gui mapping dictionary.
+        del self.gui_mapping[layer.id]
 
     def on_image_clicked(self, layer):
         '''
@@ -197,7 +215,7 @@ class ClickableLabel(QLabel):
         action_move_to_top.triggered.connect(lambda: self.layer_list_gui.layer_moved_to_top(self.layer))
         action_insert_above.triggered.connect(lambda: self.layer_list_gui.layer_inserted_above(self.layer))
         action_insert_below.triggered.connect(lambda: self.layer_list_gui.layer_inserted_below(self.layer))
-        action_delete.triggered.connect(lambda: self.layer_list_gui.layer_deleted(self.layer))
+        action_delete.triggered.connect(lambda: self.layer_list_gui.layer_deleted.emit(self.layer))
 
         # Add actions to menu
         menu.addAction(action_move_to_top)

@@ -72,6 +72,7 @@ class ImageProcessor(QWidget):
         self.layer_list.gui.layer_added.connect(self.add_layer)
         self.layer_list.gui.layer_visibility_toggled.connect(self.set_layer_visibility)
         self.layer_list.gui.layer_selected.connect(self.set_active_layer)
+        self.layer_list.gui.layer_deleted.connect(self.delete_layer)
 
     def update_zoomable_label(self):
         '''
@@ -210,6 +211,16 @@ class ImageProcessor(QWidget):
             layer (Layer): The new active layer to be set.
         '''
         self.layer_list.set_active_layer(layer)
+
+    def delete_layer(self, layer: Layer):
+        '''
+        Delete a layer.
+
+        Args:
+            layer (Layer): The layer to be deleted.
+        '''
+        print('[ImageProcessor] delete_layer')
+        self.layer_list.delete_layer(layer)
 
     def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
         '''

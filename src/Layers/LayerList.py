@@ -27,6 +27,20 @@ class LayerList(QWidget):
     def __getitem__(self, index):
         return self.layer_list[index]
 
+    @property
+    def active_layer(self) -> Layer:
+        return self.layer_list[self.active_layer_idx]
+
+    def get_layer_idx(self, layer: Layer) -> int:
+        '''
+        Get the index of a layer inside the layer_list. Use `is` checking
+        instead of `==`.
+
+        Args:
+            layer (Layer): A layer.
+        '''
+        return next((i for i, l in enumerate(self.layer_list) if l is layer))
+
     def on_delete_layer(self, layer: Layer) -> None:
         '''
         Delete a layer
@@ -95,8 +109,35 @@ class LayerList(QWidget):
             layer (Layer): The new active layer to be set.
         '''
         previously_active_layer = self.layer_list[self.active_layer_idx]
-        self.active_layer_idx = next((i for i, l in enumerate(self.layer_list) if l is layer))
+        self.active_layer_idx = self.get_layer_idx(layer)
         self.gui.set_active_layer_in_gui(layer, previously_active_layer)
+
+    def delete_layer(self, layer: Layer):
+        '''
+        Delete a layer.
+
+        Args:
+            layer (Layer): The layer to be deleted.
+        '''
+        print('[LayerList] delete_layer')
+        idx_to_delete = self.get_layer_idx(layer)
+        # Handle special case: deleting the currently active layer
+        if idx_to_delete == self.active_layer_idx:
+            if self.active_layer_idx > 0: # Try getting a layer under the active layer
+                self.set_active_layer(self.layer_list[self.active_layer_idx - 1])
+            elif len(self.layer_list) > 1: # Otherwise get the top layer
+                self.set_active_layer(self.layer_list[-1])
+            else: # Handle the case of having zero layers left
+                pass # TODO
+
+        # If the active index is after idx_do_delete we need to adjust it
+        if idx_to_delete < self.active_layer_idx:
+            self.active_layer_idx -= 1
+
+        # Delete the layer from the gui
+        self.gui.delete_layer_in_gui(layer)
+        # Delete the layer from the layerlist
+        del self.layer_list[idx_to_delete]
 
 
 class ClickableLabel(QLabel):
