@@ -200,6 +200,7 @@ class ImageProcessor(QWidget):
     def set_layer_visibility(self, layer: Layer, is_visible: bool):
         print('[ImageProcessor] Set layer visibility')
         self.layer_list.set_layer_visibility(layer, is_visible)
+        self.render_layers()
 
     def set_active_layer(self, layer: Layer):
         '''
@@ -236,6 +237,10 @@ class ImageProcessor(QWidget):
                 self.final_image = layer.final_image
                 continue
             self.final_image = self.overlay_images(self.final_image, layer.final_image)
+
+        # If there is no final_image to be drawn then draw empty canvas
+        if self.final_image is None:
+            self.final_image = np.zeros((*self.canvas_shape, 4))
 
         self.update_zoomable_label()
 

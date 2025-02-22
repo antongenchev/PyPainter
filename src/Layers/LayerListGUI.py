@@ -30,7 +30,6 @@ class LayerListGUI(QWidget):
         self.gui_mapping = defaultdict(lambda: defaultdict(lambda: None), {})
 
         self.initGUI()
-        self.add_layer_in_gui(Layer(cv2.imread('/home/anton-genchev/Desktop/papers/hq720.jpg')))
 
     def initGUI(self) -> None:
         '''
