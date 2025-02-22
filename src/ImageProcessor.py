@@ -237,7 +237,7 @@ class ImageProcessor(QWidget):
                 continue
             self.final_image = self.overlay_images(self.final_image, layer.final_image)
 
-        self.zoomable_label.update_transformed_image(self.final_image)
+        self.update_zoomable_label()
 
     def overlay_images(self, image_bottom:np.ndarray, image_top:np.ndarray) -> np.ndarray:
         '''
@@ -278,8 +278,7 @@ class ImageProcessor(QWidget):
         self.render_element(drawable_element, redraw=False) # render the drawable element
         self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
         # Add the layers together to get the final image
-        self.final_image = self.active_layer.final_image # TODO implement multiple layers logic
-        self.update_zoomable_label()
+        self.render_layers()
 
     def apply_element_transformation(self, drawable_element:DrawableElement) -> None:
         '''
