@@ -181,7 +181,22 @@ class LayerListGUI(QWidget):
         # Emit a signal with the new visibility state of the layer.
         self.layer_visibility_toggled.emit(layer, new_visibility_state)
 
+    def move_layer_to_top_in_gui(self, layer: Layer) -> None:
+        '''
+        Handles moving a layer to the top of the layer list.
 
+        Args:
+            layer (Layer): The layer that was moved.
+        '''
+        print('[EVENT] move_layer_to_top_in_gui')
+        # Retrieve the widget for this layer from the gui_mapping
+        item_widget = self.gui_mapping[layer.id]['item_widget']
+
+        # Remove the widget from its current position in the layout.
+        self.scroll_layout.removeWidget(item_widget)
+
+        # Insert the widget at the top of the layout.
+        self.scroll_layout.insertWidget(0, item_widget)
 
 class ClickableLabel(QLabel):
     """Custom QLabel that emits a signal when clicked"""
@@ -212,7 +227,7 @@ class ClickableLabel(QLabel):
         action_delete = QAction("Delete", self)
 
         # Connect actions to methods
-        action_move_to_top.triggered.connect(lambda: self.layer_list_gui.layer_moved_to_top(self.layer))
+        action_move_to_top.triggered.connect(lambda: self.layer_list_gui.layer_moved_to_top.emit(self.layer))
         action_insert_above.triggered.connect(lambda: self.layer_list_gui.layer_inserted_above(self.layer))
         action_insert_below.triggered.connect(lambda: self.layer_list_gui.layer_inserted_below(self.layer))
         action_delete.triggered.connect(lambda: self.layer_list_gui.layer_deleted.emit(self.layer))

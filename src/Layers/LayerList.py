@@ -41,22 +41,6 @@ class LayerList(QWidget):
         '''
         return next((i for i, l in enumerate(self.layer_list) if l is layer))
 
-    def on_delete_layer(self, layer: Layer) -> None:
-        '''
-        Delete a layer
-
-        Args:
-            layer (Layer): The layer to be deleted.
-        '''
-
-    def on_move_layer_to_top(self, layer: Layer) -> None:
-        '''
-        Move a layer to the top of the layer list.
-
-        Args:
-            layer (Layer): The layer to be moved.
-        '''
-
     def on_insert_layer_above(self, layer: Layer) -> None:
         '''
         Create a new layer and insert it above the provided layer.
@@ -139,64 +123,25 @@ class LayerList(QWidget):
         # Delete the layer from the layerlist
         del self.layer_list[idx_to_delete]
 
-
-class ClickableLabel(QLabel):
-    """Custom QLabel that emits a signal when clicked"""
-    clicked = pyqtSignal()
-
-    def __init__(self, parent=None, layer_list:LayerList=None, layer:Layer=None):
+    def move_layer_to_top(self, layer: Layer) -> None:
         '''
-        Pass the layer_list and layer so that actions on the layer performed by the LayerList
-        can be triggered.
+        Move a layer to the top of the layer list.
+
+        Args:
+            layer (Layer): The layer to be moved to the top.
         '''
-        super().__init__(parent)
-        self.layer_list = layer_list
-        self.layer = layer
+        print('[ImageProcessor] move_layer_to_top')
+        idx_to_move = self.get_layer_idx(layer) # The original position of the layer
 
-    def mousePressEvent(self, event):
-        self.clicked.emit()  # Emit signal when clicked
+        # Move the layer to the top
+        self.layer_list.pop(idx_to_move)
+        self.layer_list.append(layer)
 
-    def contextMenuEvent(self, event):
-        """
-        Override the context menu event to show a custom menu on right-click.
-        """
-        menu = QMenu(self)
+        # Update the active layer index
+        if self.active_layer_idx == idx_to_move:
+            self.active_layer_idx = len(self.layer_list) - 1
+        elif self.active_layer_idx > idx_to_move:
+            self.active_layer_idx -= 1
 
-        # Create actions
-        action_move_to_top = QAction("Move to Top", self)
-        action_insert_above = QAction("Insert Above", self)
-        action_insert_below = QAction("Insert Below", self)
-        action_delete = QAction("Delete", self)
-
-        # Connect actions to methods
-        action_move_to_top.triggered.connect(lambda: self.move_to_top())
-        action_insert_above.triggered.connect(lambda: self.insert_above())
-        action_insert_below.triggered.connect(lambda: self.insert_below())
-        action_delete.triggered.connect(lambda: self.delete())
-
-        # Add actions to menu
-        menu.addAction(action_move_to_top)
-        menu.addAction(action_insert_above)
-        menu.addAction(action_insert_below)
-        menu.addSeparator()
-        menu.addAction(action_delete)
-
-        # Show the menu at the cursor position
-        menu.exec_(event.globalPos())
-
-    def move_to_top(self):
-        """Moves the current layer to the top of the layer list."""
-        self.layer_list.on_move_layer_to_top(self.layer)
-
-    def insert_above(self):
-        """Inserts a new layer directly above this one."""
-        self.layer_list.on_insert_layer_above(self.layer)
-
-    def insert_below(self):
-        """Inserts a new layer directly below this one."""
-        self.layer_list.on_insert_layer_below(self.layer)
-
-    def delete(self):
-        """Deletes the current layer."""
-        self.layer_list.on_delete_layer(self.layer)
-
+        # Update the gui
+        self.gui.move_layer_to_top_in_gui(layer)

@@ -73,6 +73,7 @@ class ImageProcessor(QWidget):
         self.layer_list.gui.layer_visibility_toggled.connect(self.set_layer_visibility)
         self.layer_list.gui.layer_selected.connect(self.set_active_layer)
         self.layer_list.gui.layer_deleted.connect(self.delete_layer)
+        self.layer_list.gui.layer_moved_to_top.connect(self.move_layer_to_top)
 
     def update_zoomable_label(self):
         '''
@@ -198,12 +199,12 @@ class ImageProcessor(QWidget):
         '''
         return Layer(np.zeros((*self.canvas_shape, 4), dtype=np.uint8))
 
-    def set_layer_visibility(self, layer: Layer, is_visible: bool):
+    def set_layer_visibility(self, layer: Layer, is_visible: bool) -> None:
         print('[ImageProcessor] Set layer visibility')
         self.layer_list.set_layer_visibility(layer, is_visible)
         self.render_layers()
 
-    def set_active_layer(self, layer: Layer):
+    def set_active_layer(self, layer: Layer) -> None:
         '''
         Set the active layer.
 
@@ -212,7 +213,7 @@ class ImageProcessor(QWidget):
         '''
         self.layer_list.set_active_layer(layer)
 
-    def delete_layer(self, layer: Layer):
+    def delete_layer(self, layer: Layer) -> None:
         '''
         Delete a layer.
 
@@ -221,6 +222,17 @@ class ImageProcessor(QWidget):
         '''
         print('[ImageProcessor] delete_layer')
         self.layer_list.delete_layer(layer)
+        self.render_layers()
+
+    def move_layer_to_top(self, layer: Layer) -> None:
+        '''
+        Move a layer to the top of the layer list.
+
+        Args:
+            layer (Layer): The layer to be moved to the top.
+        '''
+        print('[ImageProcessor] move_layer_to_top')
+        self.layer_list.move_layer_to_top(layer)
         self.render_layers()
 
     def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
