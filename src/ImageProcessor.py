@@ -221,6 +221,7 @@ class ImageProcessor(QWidget):
         '''
         print('[ImageProcessor] delete_layer')
         self.layer_list.delete_layer(layer)
+        self.render_layers()
 
     def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
         '''

@@ -128,10 +128,10 @@ class LayerList(QWidget):
             elif len(self.layer_list) > 1: # Otherwise get the top layer
                 self.set_active_layer(self.layer_list[-1])
             else: # Handle the case of having zero layers left
-                pass # TODO
+                self.active_layer_idx = None
 
         # If the active index is after idx_do_delete we need to adjust it
-        if idx_to_delete < self.active_layer_idx:
+        if self.active_layer_idx is not None and idx_to_delete < self.active_layer_idx:
             self.active_layer_idx -= 1
 
         # Delete the layer from the gui

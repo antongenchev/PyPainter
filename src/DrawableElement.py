@@ -35,7 +35,7 @@ class DrawableElement():
         Parameters:
             x - the x coordinate
             y - the y coordinate
-            r - the radius around (x, y
+            r - the radius around (x, y)
         Returns:
             bool: True if the element is touched, False otherwise
         '''
