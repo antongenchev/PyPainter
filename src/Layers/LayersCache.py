@@ -77,10 +77,10 @@ class LayersCache:
         # optimal_covers[i] is a tuple (score, caches)
         # where score is the number of layer unions saved and caches is just a list caches
         # optimal_covers[i] considers only layers up to and including interval[i].
-        optimal_covers = [None for _ in len(intervals)]
+        optimal_covers = [None] * len(intervals)
 
         # Base case: only the first interval is considered
-        optimal_covers[0] = (len(intervals[0][2]) - 1, intervals[0][2])
+        optimal_covers[0] = (len(intervals[0][2]) - 1, [intervals[0][2]])
 
         # Non-base cases: only the first i intervals are considered
         for i in range(1, len(intervals)):
@@ -91,7 +91,7 @@ class LayersCache:
             score_without, selection_without = optimal_covers[i-1]
 
             # Option 2: Include the ith interval
-            j = find_last_non_overlapping_interval(i)
+            j = find_last_non_overlapping_interval(i, intervals)
             if j != -1:
                 score_with = score_i + optimal_covers[j][0]
                 selection_with = optimal_covers[j][1] + [tup_i]
@@ -99,13 +99,13 @@ class LayersCache:
                 score_with = score_i
                 selection_with = [tup_i]
 
-        # Choose Option 1 or 2: Which one saves more layer unions?
-        if (score_with > score_without):
-            optimal_covers[i] = (score_with, selection_with)
-        else:
-            optimal_covers[i] = (score_without, selection_without)
+            # Choose Option 1 or 2: Which one saves more layer unions?
+            if (score_with > score_without):
+                optimal_covers[i] = (score_with, selection_with)
+            else:
+                optimal_covers[i] = (score_without, selection_without)
 
-        return optimal_covers[-1][2]
+        return optimal_covers[-1][1]
 
 
 def find_last_non_overlapping_interval(idx: int, intervals: List[int]) -> int:
