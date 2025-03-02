@@ -77,7 +77,7 @@ class LayerListGUI(QWidget):
         self.icon_eye_enable = create_svg_icon(os.path.join(self.resource_path, 'eye_enable.svg'))
         self.icon_eye_disable = create_svg_icon(os.path.join(self.resource_path, 'eye_disable.svg'))
 
-    def add_layer_in_gui(self, layer: Layer) -> None:
+    def add_layer_in_gui(self, layer: Layer, *, index:int=0) -> None:
         '''
         Add a clickable image to the GUI of the LayerList to represent
         a single layer.
@@ -130,7 +130,7 @@ class LayerListGUI(QWidget):
         self.gui_mapping[layer.id]['item_widget'] = item_widget
 
         # Add to scroll layout
-        self.scroll_layout.insertWidget(0, item_widget)
+        self.scroll_layout.insertWidget(index, item_widget)
 
     def set_active_layer_in_gui(self, new_active_layer: Layer, previous_active_layer: Layer):
         '''
@@ -160,7 +160,7 @@ class LayerListGUI(QWidget):
         '''
         Handles clicks on the layer image in the layer list gui.
         '''
-        print('[EVENT] on_image_clicked')
+        print('[GUI] on_image_clicked')
         self.layer_selected.emit(layer)
 
     def on_eye_clicked(self, button_eye: QPushButton, layer: Layer) -> None:
@@ -172,7 +172,7 @@ class LayerListGUI(QWidget):
                 will be updated.
             layer (Layer): The layer corresponding to the eye button clicked
         '''
-        print('[EVENT] on_eye_clicked')
+        print('[GUI] on_eye_clicked')
         new_visibility_state = not layer.visible
         if new_visibility_state:
             button_eye.setIcon(self.icon_eye_enable)
@@ -188,7 +188,7 @@ class LayerListGUI(QWidget):
         Args:
             layer (Layer): The layer that was moved.
         '''
-        print('[EVENT] move_layer_to_top_in_gui')
+        print('[GUI] move_layer_to_top_in_gui')
         # Retrieve the widget for this layer from the gui_mapping
         item_widget = self.gui_mapping[layer.id]['item_widget']
 
@@ -197,6 +197,17 @@ class LayerListGUI(QWidget):
 
         # Insert the widget at the top of the layout.
         self.scroll_layout.insertWidget(0, item_widget)
+
+    def insert_layer(self, index:int, layer: Layer) -> None:
+        '''
+        Handles insertion of a new layer in the middle of the layer list.
+
+        Args:
+            index (int): The place in which to insert the new layer widget.
+            layer (Layer): The actual layer.
+        '''
+        print('[GUI] insert_layer')
+        self.add_layer_in_gui(layer, index=index)
 
 class ClickableLabel(QLabel):
     """Custom QLabel that emits a signal when clicked"""
@@ -228,8 +239,8 @@ class ClickableLabel(QLabel):
 
         # Connect actions to methods
         action_move_to_top.triggered.connect(lambda: self.layer_list_gui.layer_moved_to_top.emit(self.layer))
-        action_insert_above.triggered.connect(lambda: self.layer_list_gui.layer_inserted_above(self.layer))
-        action_insert_below.triggered.connect(lambda: self.layer_list_gui.layer_inserted_below(self.layer))
+        action_insert_above.triggered.connect(lambda: self.layer_list_gui.layer_inserted_above.emit(self.layer))
+        action_insert_below.triggered.connect(lambda: self.layer_list_gui.layer_inserted_below.emit(self.layer))
         action_delete.triggered.connect(lambda: self.layer_list_gui.layer_deleted.emit(self.layer))
 
         # Add actions to menu

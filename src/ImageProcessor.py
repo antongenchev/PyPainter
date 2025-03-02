@@ -74,6 +74,8 @@ class ImageProcessor(QWidget):
         self.layer_list.gui.layer_selected.connect(self.set_active_layer)
         self.layer_list.gui.layer_deleted.connect(self.delete_layer)
         self.layer_list.gui.layer_moved_to_top.connect(self.move_layer_to_top)
+        self.layer_list.gui.layer_inserted_above.connect(lambda l: self.insert_empty_layer(l, True))
+        self.layer_list.gui.layer_inserted_below.connect(lambda l: self.insert_empty_layer(l, False))
 
     def update_zoomable_label(self):
         '''
@@ -234,6 +236,25 @@ class ImageProcessor(QWidget):
         print('[ImageProcessor] move_layer_to_top')
         self.layer_list.move_layer_to_top(layer)
         self.render_layers()
+
+    def insert_empty_layer(self, layer: Layer, above: bool) -> None:
+        '''
+        Insert an empty layer above or below the layer provided.
+        Set the new layer as the active layer.
+
+        Args:
+            layer (Layer): The layer above or below which to insert the new layer.
+            above (bool): If True insert the new layer above the layer provided.
+                If False insert the new layer below the layer provided
+        '''
+        print('[ImageProcessor] insert_layer_above')
+        # Get the index at which to insert the new layer
+        insert_index = self.layer_list.get_layer_idx(layer)
+        if above:
+            insert_index += 1
+
+        # Insert the new layer
+        self.layer_list.insert_empty_layer(insert_index, self.create_empty_layer())
 
     def render_partial_layer(self, layer:Layer, start_index:int, end_index:int) -> np.ndarray:
         '''

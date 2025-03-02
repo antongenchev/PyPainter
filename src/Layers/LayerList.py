@@ -145,3 +145,23 @@ class LayerList(QWidget):
 
         # Update the gui
         self.gui.move_layer_to_top_in_gui(layer)
+
+    def insert_empty_layer(self, insert: int, layer: Layer) -> None:
+        '''
+        Insert an empty layer above or below the layer provided.
+        Set the new layer as the active layer.
+
+        Args:
+            insert (int): The index at which to insert hte new layer.
+            layer (Layer): The empty layer that will be inserted.
+        '''
+        print('[LayerList] insert_layer_above')
+
+        # Insert the new layer.
+        self.layer_list.insert(insert, layer)
+        self.gui.insert_layer(insert, layer)
+
+        # Set the new layer as the active layer.
+        if insert <= self.active_layer_idx:
+            self.active_layer_idx += 1
+        self.set_active_layer(layer)
