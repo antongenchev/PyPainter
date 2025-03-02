@@ -1,2 +1,11 @@
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.coverage.run]
+omit = [
+    "src/config.py",
+    "*GUI.py",
+    "*__init__.py"
+]
+
+
