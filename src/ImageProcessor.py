@@ -20,6 +20,7 @@ from src.config import config
 from src.ImageProcessingToolSetting import ImageProcessingToolSetting
 # Import ImageProcessingTools
 from src.ImageProcessingTools.ImageProcessingTool import ImageProcessingTool
+from src.ImageProcessingTools.ToolManager import ToolManager
 
 class ImageProcessor(QWidget):
 
@@ -32,6 +33,7 @@ class ImageProcessor(QWidget):
                  zoomable_widget:ZoomableWidget,
                  image_processing_tool_setting:ImageProcessingToolSetting):
         super().__init__()
+        self.tool_manager = ToolManager(self)
         self.zoomable_widget = zoomable_widget
         self.zoomable_label = zoomable_widget.zoomable_label
         self.current_tool = None
@@ -45,6 +47,9 @@ class ImageProcessor(QWidget):
 
         self.image_processing_tool_setting = image_processing_tool_setting
 
+        # Load the Tools from the config file
+        self.tool_manager.load_tools_from_config()
+
         # Connect the signals from different gui parts
         self.connect_signals()
 
@@ -55,11 +60,9 @@ class ImageProcessor(QWidget):
         layout.setSpacing(6)
         layout.setAlignment(Qt.AlignLeft) 
 
-        # Load tools from the config.json file
-        self.load_tools_from_config()
-
-        for tool_name in sorted(self.tool_classes.keys(), key=lambda k: self.tool_classes[k]['order']):
-            tool_obj = self.tool_classes[tool_name]['object']
+        # Generate the gui for the tools from the
+        for tool_name in sorted(self.tool_manager.tools.keys(), key=lambda k: self.tool_manager.tools[k]['order']):
+            tool_obj = self.tool_manager.tools[tool_name]['object']
             tool_widget = tool_obj.create_ui()
             layout.addWidget(tool_widget)
 
@@ -92,18 +95,6 @@ class ImageProcessor(QWidget):
     ################
     # Handle tools #
     ################
-
-    def load_tools_from_config(self):
-        for tool in config['tools']:
-            tool_name = tool["name"]
-            module = importlib.import_module(f'src.ImageProcessingTools.{tool_name}.{tool_name}')
-            tool_class = getattr(module, tool_name)
-            tool_obj = tool_class(self)
-            self.tool_classes[tool_name] = {
-                'class': tool_class,
-                'object': tool_obj,
-                'order': tool['order'],
-            }
 
     def set_tool(self, tool: ImageProcessingTool):
         # Disable the previous tool
@@ -319,7 +310,7 @@ class ImageProcessor(QWidget):
             # Do not redraw if the image is already drawn
             return
         tool_name = drawable_element.tool
-        tool_obj = self.tool_classes[tool_name]['object']
+        tool_obj = self.tool_manager.tools[tool_name]['object']
         tool_obj.draw_drawable_element(drawable_element)
 
     def add_element(self, drawable_element:DrawableElement):
