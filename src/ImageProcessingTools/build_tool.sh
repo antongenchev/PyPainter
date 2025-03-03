@@ -1,19 +1,52 @@
 #!/bin/bash
 
-# This script is used to build ImageProcessingTools Tools.
-# $1 - tool name
-# $2 - is the build clean
+###############################################
+# Build Script for ImageProcessingTools       #
+###############################################
+# This script automates the build process     #
+# for ImageProcessingTools, allowing you      #
+# to clean previous builds, generate a        #
+# `setup.py` file (if it doesn't exist),      #
+# and compile Python Cython extensions.       #
+#                                             #
+# Arguments:                                  #
+#   $1 - Tool name (e.g., "ShapeTool")        #
+#   $2 - Optional flags:                      #
+#       --clean         : Clean previous      #
+#                         build artifacts     #
+#       --generate-setup: Generate a basic    #
+#                         setup.py file if    #
+#                         it doesn't exist.   #
+#                                             #
+########################################################################
+# Example usage:                                                       #
+#   ./src/ImageProcessingTools/build_tool.sh ToolName --clean          #
+#   ./src/ImageProcessingTools/build_tool.sh ToolName --generate-setup #
+########################################################################
 
 TOOL_NAME="$1"
 
-CLEAN=0
-if [ "$2" == "--clean" ]; then
-    CLEAN=1
-fi
+# FLAGS
+CLEAN=0 # Clean build (delete build folders)
+GENERATE_SETUP=0 # Generate setup.py (only if setup.py does not exist)
+
+# Check for flags in any order
+for arg in "$@"; do
+    case $arg in
+        --clean)
+            CLEAN=1
+            ;;
+        --generate-setup)
+            GENERATE_SETUP=1
+            ;;
+        *)
+            ;;
+    esac
+done
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
-    echo "[Error] Virtual environment 'venv' does not exist. Please create one first."
+    echo -e "\e[31m[Error] Virtual environment 'venv' does not exist. Please create one first.\e[0m"
     exit 1
 fi
 source venv/bin/activate
@@ -22,8 +55,22 @@ source venv/bin/activate
 tool_dir="src/ImageProcessingTools/$TOOL_NAME/"
 setup_file="$tool_dir/setup.py"
 if [ ! -f "$setup_file" ]; then
-    echo "[Error] File '$setup_file' does not exist!"
-    exit 1
+    if [ $GENERATE_SETUP -eq 1 ]; then
+        echo "[Info] Generating setup.py file for $TOOL_NAME"
+        cat > "$setup_file" <<EOL
+from setuptools import setup
+from Cython.Build import cythonize
+
+setup(
+    name="$TOOL_NAME",
+    ext_modules=cythonize("$TOOL_NAME.py")
+)
+EOL
+        echo -e "\e[32m[Success] setup.py file generated for $TOOL_NAME.\e[0m"
+    else
+        echo -e "\e[31m[Error] File '$setup_file' does not exist!\e[0m"
+        exit 1
+    fi
 fi
 
 cd $tool_dir
@@ -40,7 +87,7 @@ python setup.py build_ext --inplace
 
 # Check if the build was successful
 if [ $? -ne 0 ]; then
-    echo "[Error] Build failed!"
+    echo -e "\e[31m[Error] Build failed!\e[0m"
     exit 1
 fi
 

@@ -248,7 +248,7 @@ class PencilTool(ImageProcessingTool):
 
         # Color Picker Button
         color_picker_button = QPushButton("Select Pencil Color")
-        color_picker_button.clicked.connect(self.open_color_picker)
+        color_picker_button.clicked.connect(lambda: self.open_color_picker())
         layout.addWidget(color_picker_button)
 
         settings_widget.setLayout(layout)

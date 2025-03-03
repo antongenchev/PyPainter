@@ -4,3 +4,5 @@ dist/
 main.spec
 __pycache__/
 .coverage
+src/ImageProcessingTools/**/*.c
+src/ImageProcessingTools/**/*.so

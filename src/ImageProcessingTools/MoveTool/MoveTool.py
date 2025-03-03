@@ -14,7 +14,7 @@ class MoveTool(ImageProcessingTool):
         self.button.setIcon(create_svg_icon(f'{self.resources_path}/tool_button.svg'))
         self.button.setIconSize(QSize(36, 36))
         self.button.setFixedSize(QSize(36, 36))
-        self.button.clicked.connect(partial(self.set_tool))
+        self.button.clicked.connect(lambda: partial(self.set_tool)())
 
         # Use to keep the button highlighted because after enable there is an immediate
         # disable for this tool.

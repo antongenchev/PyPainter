@@ -95,7 +95,7 @@ class TextTool(ImageProcessingTool):
         self.bold_button.setIcon(create_svg_icon(f'{self.resources_path}/icon_bold.svg'))
         self.bold_button.setIconSize(QSize(24, 24))
         self.bold_button.setFixedSize(QSize(self.icon_button_width, self.icon_button_height))
-        self.bold_button.clicked.connect(self.toggle_bold)
+        self.bold_button.clicked.connect(lambda: self.toggle_bold())
         icon_layout.addWidget(self.bold_button)
 
         # Italic button
@@ -103,7 +103,7 @@ class TextTool(ImageProcessingTool):
         self.italic_button.setIcon(create_svg_icon(f'{self.resources_path}/icon_italic.svg'))
         self.italic_button.setIconSize(QSize(24, 24))
         self.italic_button.setFixedSize(QSize(self.icon_button_width, self.icon_button_height))
-        self.italic_button.clicked.connect(self.toggle_italic)
+        self.italic_button.clicked.connect(lambda: self.toggle_italic())
         icon_layout.addWidget(self.italic_button)
 
         # Underline button
@@ -111,7 +111,7 @@ class TextTool(ImageProcessingTool):
         self.underline_button.setIcon(create_svg_icon(f'{self.resources_path}/icon_underline.svg'))
         self.underline_button.setIconSize(QSize(24, 24))
         self.underline_button.setFixedSize(QSize(self.icon_button_width, self.icon_button_height))
-        self.underline_button.clicked.connect(self.toggle_underline)
+        self.underline_button.clicked.connect(lambda: self.toggle_underline())
         icon_layout.addWidget(self.underline_button)
 
         # Strikethrough button
@@ -119,7 +119,7 @@ class TextTool(ImageProcessingTool):
         self.strikethrough_button.setIcon(create_svg_icon(f'{self.resources_path}/icon_strikethrough.svg'))
         self.strikethrough_button.setIconSize(QSize(24, 24))
         self.strikethrough_button.setFixedSize(QSize(self.icon_button_width, self.icon_button_height))
-        self.strikethrough_button.clicked.connect(self.toggle_strikethrough)
+        self.strikethrough_button.clicked.connect(lambda: self.toggle_strikethrough())
         icon_layout.addWidget(self.strikethrough_button)
 
         # Add the icons to the font_options_layout
@@ -142,7 +142,7 @@ class TextTool(ImageProcessingTool):
         text_color_button.setIcon(create_svg_icon(f'{self.resources_path}/icon_color_choice.svg'))
         text_color_button.setIconSize(QSize(24, 24))
         text_color_button.setFixedSize(QSize(40, 40))
-        text_color_button.clicked.connect(self.open_color_picker)
+        text_color_button.clicked.connect(lambda: self.open_color_picker())
         color_choice_layout.addWidget(text_color_button)
         self.color_hex_label = QLabel(f"{self.text_color}")
         self.color_hex_label.setFixedWidth(50)
@@ -619,4 +619,4 @@ def hex_to_rgba(hex_color: str, alpha: float) -> str:
     g = int(hex_color[2:4], 16)
     b = int(hex_color[4:6], 16)
     a = int(alpha * 255)  # Convert alpha (0.0-1.0) to 0-255
-    return f"rgba({r}, {g}, {b}, {a})"
+    return str(f"rgba({r}, {g}, {b}, {a})")

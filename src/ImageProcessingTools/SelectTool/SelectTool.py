@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from enum import IntEnum, auto
 from src.DrawableElement import DrawableElement
-from src.RotatableBox import RotatableBox
+from src.ImageProcessingTools.SelectTool.RotatableBox import RotatableBox
 from src.utils.image_rendering import create_svg_icon
 
 class SelectTool(ImageProcessingTool):
@@ -28,7 +28,7 @@ class SelectTool(ImageProcessingTool):
         self.button.setIcon(create_svg_icon(f'{self.resources_path}/tool_button.svg'))
         self.button.setIconSize(QSize(36, 36))
         self.button.setFixedSize(QSize(36, 36))
-        self.button.clicked.connect(partial(self.set_tool))
+        self.button.clicked.connect(lambda: partial(self.set_tool)())
         return self.button
 
     def create_settings_ui(self):
