@@ -1,0 +1,10 @@
+tool:
+  name: "TextTool"
+  version: "1.0.0"
+  description: "A tool for writing text."
+  author: "Anton Genchev"
+  license: "MIT"
+
+dependency:
+  python: ">=3.8"
+  packages:

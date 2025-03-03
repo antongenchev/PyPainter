@@ -1,0 +1,11 @@
+tool:
+  name: "SelectTool"
+  version: "1.0.0"
+  description: "A tool for selecting, moving, resising and rotating drawable elements."
+  author: "Anton Genchev"
+  license: "MIT"
+
+dependency:
+  python: ">=3.8"
+  packages:
+    - pyyaml

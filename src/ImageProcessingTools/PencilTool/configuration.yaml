@@ -1,0 +1,11 @@
+tool:
+  name: "PencilTool"
+  version: "1.0.0"
+  description: "A tool for drawing."
+  author: "Anton Genchev"
+  license: "MIT"
+
+dependency:
+  python: ">=3.8"
+  packages:
+    - numpy
