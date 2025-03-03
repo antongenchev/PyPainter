@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# This script is used to build ImageProcessingTools Tools.
+# $1 - tool name
+# $2 - is the build clean
+
+TOOL_NAME="$1"
+
+CLEAN=0
+if [ "$2" == "--clean" ]; then
+    CLEAN=1
+fi
+
+# Check if virtual environment exists
+if [ ! -d "venv" ]; then
+    echo "[Error] Virtual environment 'venv' does not exist. Please create one first."
+    exit 1
+fi
+source venv/bin/activate
+
+# Define the tool directory and setup file
+tool_dir="src/ImageProcessingTools/$TOOL_NAME/"
+setup_file="$tool_dir/setup.py"
+if [ ! -f "$setup_file" ]; then
+    echo "[Error] File '$setup_file' does not exist!"
+    exit 1
+fi
+
+cd $tool_dir
+
+# Clean previous builds if the flag is set
+if [ $CLEAN -eq 1 ]; then
+    echo "[Info] Cleaning up previous builds..."
+    rm -rf build/
+fi
+
+# Run the build process
+echo "[Info] Building $TOOL_NAME..."
+python setup.py build_ext --inplace
+
+# Check if the build was successful
+if [ $? -ne 0 ]; then
+    echo "[Error] Build failed!"
+    exit 1
+fi
+
+echo "[Info] Build completed successfully."
+
+
+
+##############################
+# Check package dependencies #
+##############################
+# Warnings will be generated if there are missing dependencies.
+# Even if the build is successful the shared object module might
+# rely on dependencies which are not installed (e.g. numpy, etc.).
+# These distrbution packages must be installed manually before the
+# project can be started using main.py or build into an executable.
+
+# Get the required python packages
+dependencies=$(python -c "import yaml; 
+with open('configuration.yaml', 'r') as f: 
+    config = yaml.safe_load(f); 
+    print(config.get('dependency', {}).get('packages', []))")
+dependencies_list=$(echo "$dependencies" | tr -d "[],'\""| tr '\n' ' ')
+
+# Get the list of installed packages
+installed_packages=$(pip freeze)
+
+warn_flag=0
+missing_dependencies=()
+for dep in $dependencies_list; do
+    dep_name=$(echo $dep | sed 's/[<>=!].*//')
+    installed_version=$(echo "$installed_packages" | grep -oP "\b$dep_name==\K[^\s]+")
+
+    # If the package is not installed at all, mark as missing
+    if [ -z "$installed_version" ]; then
+        missing_dependencies+=("$dep")
+        warn_flag=1
+        continue
+    fi
+
+    # Handle version specifiers (e.g., ==, > etc.)
+    if [[ "$dep" =~ == ]]; then
+        required_version=$(echo $dep | sed 's/.*==//')
+        if [ "$installed_version" != "$required_version" ]; then
+            echo -e "\e[33m[Warning] Version mismatch for $dep_name: required $required_version, but installed $installed_version.\e[0m"
+            warn_flag=1
+        fi
+    elif [[ "$dep" =~ ">=" ]]; then
+        required_version=$(echo $dep | sed 's/.*>=//')
+        if [[ "$(python -c 'from packaging import version; print(version.parse("'$installed_version'") >= version.parse("'$required_version'"))')" != "True" ]]; then
+            echo -e "\e[33m[Warning] Installed version $installed_version of $dep_name is lower than required $required_version.\e[0m"
+            warn_flag=1
+        fi
+    elif [[ "$dep" =~ "<=" ]]; then
+        required_version=$(echo $dep | sed 's/.*<=//')
+        if [[ "$(python -c 'from packaging import version; print(version.parse("'$installed_version'") <= version.parse("'$required_version'"))')" != "True" ]]; then
+            echo -e "\e[33m[Warning] Installed version $installed_version of $dep_name is higher than required $required_version.\e[0m"
+            warn_flag=1
+        fi
+    elif [[ "$dep" =~ ">" ]]; then
+        required_version=$(echo $dep | sed 's/.*>//')
+        if [[ "$(python -c 'from packaging import version; print(version.parse("'$installed_version'") > version.parse("'$required_version'"))')" != "True" ]]; then
+            cho -e "\e[33m[Warning] Installed version $installed_version of $dep_name is not greater than required $required_version.\e[0m"
+            warn_flag=1
+        fi
+    elif [[ "$dep" =~ "<" ]]; then
+        required_version=$(echo $dep | sed 's/.*<//')
+        if [[ "$(python -c 'from packaging import version; print(version.parse("'$installed_version'") < version.parse("'$required_version'"))')" != "True" ]]; then
+            cho -e "\e[33m[Warning] Installed version $installed_version of $dep_name is not lower than required $required_version.\e[0m"
+            warn_flag=1
+        fi
+    elif [[ "$dep" =~ "!=" ]]; then
+        required_version=$(echo $dep | sed 's/.*!=//')
+        if [ "$installed_version" == "$required_version" ]; then
+            echo -e "\e[33m[Warning] Installed version $installed_version of $dep_name is equal to forbidden version $required_version.\e[0m"
+            warn_flag=1
+        fi
+    fi
+done
+
+if [ ${#missing_dependencies[@]} -gt 0 ]; then
+    echo -e "\e[33m[Warning] The following dependencies are required but missing in the virtual environment:\e[0m"
+    for dep in "${missing_dependencies[@]}"; do
+        echo -e "\e[33m - $dep\e[0m"
+    done
+fi
+
+if [ $warn_flag -eq 1 ]; then
+    echo -e "\e[33m[Warning] There were warnings during the dependency check. Please review the messages above.\n   Advice: Use pip to resolve them.\e[0m"
+else
+    echo -e "\e[32m[INFO] All python package dependencies are correctly installed and up-to-date!\e[0m"
+fi
+
