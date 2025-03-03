@@ -96,7 +96,7 @@ class ImageProcessor(QWidget):
     def load_tools_from_config(self):
         for tool in config['tools']:
             tool_name = tool["name"]
-            module = importlib.import_module(f'src.ImageProcessingTools.{tool_name}')
+            module = importlib.import_module(f'src.ImageProcessingTools.{tool_name}.{tool_name}')
             tool_class = getattr(module, tool_name)
             tool_obj = tool_class(self)
             self.tool_classes[tool_name] = {

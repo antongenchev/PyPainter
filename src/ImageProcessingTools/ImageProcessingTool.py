@@ -1,7 +1,20 @@
 import numpy as np
+from typing import List
 from src.DrawableElement import DrawableElement
 
-class ImageProcessingTool:
+'''
+ImageProcessingTool is the parent class of all tools.
+'''
+
+class ToolMetaClass(type):
+    tools_registered: List[type] = []
+
+    def __init__(cls, name, bases, attrs):
+        super().__init__(cls)
+        if name != 'ImageProcessingTool':
+            ToolMetaClass.tools_registered.append(cls)
+
+class ImageProcessingTool(metaclass=ToolMetaClass):
     def __init__(self, image_processor):
         self.image_processor = image_processor
         self.drawing_enabled = False
