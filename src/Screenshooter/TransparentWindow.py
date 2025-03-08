@@ -3,7 +3,7 @@ from typing import List
 from PyQt5.QtCore import Qt, QObject, QEvent, QRect, pyqtSignal
 from PyQt5.QtGui import QPainter, QPen, QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QShortcut
-from src.DraggableBox import DraggableBox
+from src.Screenshooter.DraggableBox import DraggableBox
 from src.OverlayWidget import OverlayWidget
 from src.Memento import MementoTransparentWindow
 from src.Caretaker import caretaker

@@ -10,9 +10,8 @@ from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
 import cv2
 import os
 
-class LayerList(QWidget):
+class LayerList:
     def __init__(self):
-        super().__init__()
 
         self.resource_path = '/home/anton-genchev/projects/Screenshot-utility/resources/layerlist'
 

@@ -20,7 +20,7 @@ class zone_areas(IntEnum):
 
 class DraggableBox(QFrame):
 
-    # Sginal that sends changes to the screenshot selection (moving/resizing). Signals to ScreenshotApp
+    # Sginal that sends changes to the screenshot selection (moving/resizing). Signals to Screenshooter
     signal_selection_change_light = pyqtSignal()
     # Signal that sends final changes to the selection (after moving/resizing). Signals to TransparentWindow
     signal_selection_change = pyqtSignal()
@@ -114,7 +114,7 @@ class DraggableBox(QFrame):
 
     def on_change_selection(self, selection:Box):
         '''
-        Handle change of the screenshot selection from outside (e.g. from ScreenshotApp)
+        Handle change of the screenshot selection from outside (e.g. from Screenshooter)
         '''
         self.selection = selection
         self.setGeometry(self.selection.left - self.border,

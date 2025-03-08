@@ -1,4 +1,4 @@
-from src.ScreenshotApp import ScreenshotApp
+from src.PyPainter import PyPainter
 from PyQt5.QtWidgets import QApplication
 import os
 import sys
@@ -9,6 +9,6 @@ load_dotenv()
 
 if __name__ == '__main__':
     Qapp = QApplication(sys.argv)
-    app = ScreenshotApp()
+    app = PyPainter()
     app.show()
     sys.exit(Qapp.exec_())

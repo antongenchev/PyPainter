@@ -21,7 +21,7 @@
 ## Mementos
 - **max_num_mementos**: (int) Maximum number of mementos (history or checkpoints) to keep.
 - **time_limits**: (object) Contains timing restrictions for related mementos.
-  - **MementoTransparentWindow**: (float) Maximum allowed time difference (in seconds) between two `MementoTransparentWindow` objects for them to be considered related. If two mementos are created by the `ScreenshotApp` within this time window, they are related.
+  - **MementoTransparentWindow**: (float) Maximum allowed time difference (in seconds) between two `MementoTransparentWindow` objects for them to be considered related. If two mementos are created by the `PyPainter` within this time window, they are related.
 
 ## ZoomableLabel
 - **min_pixels_per_side**: (int) Minimum number of pixels per side from the original cv2 image.
