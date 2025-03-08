@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog
 from PyQt5.QtCore import pyqtSignal
 from src.ZoomableWidget import ZoomableWidget
 from src.ImageProcessor import ImageProcessor
 from src.ImageProcessingToolSetting import ImageProcessingToolSetting
 from src.Screenshooter.mediator import ScreenshooterMediator
-from src.MenuBar import MenuBar
+from src.MenuBar.mediator import MenuBarMediator
 from mss import mss
 import cv2
 import numpy as np
@@ -21,6 +21,7 @@ class PyPainter(QWidget):
         self.tool_settings_widget = ImageProcessingToolSetting()
         self.image_processor = ImageProcessor(self.zoomable_widget, self.tool_settings_widget)
         self.screenshooter = ScreenshooterMediator(self)
+        self.menu_bar = MenuBarMediator(self)
 
         self.zoomable_widget.zoomable_label.draw_signal.connect(self.image_processor.on_mouse_move)
         self.zoomable_widget.zoomable_label.start_draw_signal.connect(self.image_processor.on_mouse_down)
@@ -40,8 +41,9 @@ class PyPainter(QWidget):
                          config['start_position']['width'],
                          config['start_position']['height'])
 
-        self.menu_bar = MenuBar(self)
-        self.layout.setMenuBar(self.menu_bar)
+
+        # The MenuBar / Navbar on top of the app
+        self.layout.setMenuBar(self.menu_bar.gui)
 
         # Label to display the image
         self.layout.addWidget(self.zoomable_widget)

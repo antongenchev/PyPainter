@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMenuBar, QMenu, QAction
 from PyQt5.QtCore import pyqtSignal
 
 
-class MenuBar(QMenuBar):
+class MenuBarGUI(QMenuBar):
     load_image_signal = pyqtSignal()  # Signal emitted when "Load Image" is clicked
     save_image_signal = pyqtSignal()  # Signal emitted when "Save Image" is clicked
     manage_plugins_signal = pyqtSignal()  # Signal emitted when "Manage Plugins" is clicked
