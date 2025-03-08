@@ -1,5 +1,8 @@
 [tool.pytest.ini_options]
 pythonpath = ["."]
+env = [
+    "WITHGUI=0" # Skip GUI logic when unit testing
+]
 
 [tool.coverage.run]
 omit = [

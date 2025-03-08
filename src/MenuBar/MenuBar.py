@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog
 from src.MenuBar.MenuBarGUI import MenuBarGUI
+from src.config import WITHGUI
 from typing import Callable
 import cv2
 
@@ -14,9 +15,9 @@ class MenuBar:
 
     def __init__(self):
 
-        self.gui = MenuBarGUI()
-        self.connect_signals()
-
+        if WITHGUI:
+            self.gui = MenuBarGUI()
+            self.connect_signals()
 
     def connect_signals(self):
         '''
@@ -30,7 +31,8 @@ class MenuBar:
         """
         Opens a file dialog to load an image and updates the zoomable widget.
         """
-        file_path, _ = QFileDialog.getOpenFileName(self.gui, "Open Image", "", 
+        # Open a file dialog
+        file_path, _ = QFileDialog.getOpenFileName(None, "Open Image", "", 
                                                    "Images (*.png *.jpg *.jpeg *.bmp *.tiff *.webp)")
 
         if not file_path:

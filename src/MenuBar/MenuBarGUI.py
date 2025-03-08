@@ -7,8 +7,8 @@ class MenuBarGUI(QMenuBar):
     save_image_signal = pyqtSignal()  # Signal emitted when "Save Image" is clicked
     manage_plugins_signal = pyqtSignal()  # Signal emitted when "Manage Plugins" is clicked
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.initUI()
 
     def initUI(self):
