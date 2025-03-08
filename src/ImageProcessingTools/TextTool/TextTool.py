@@ -1,10 +1,9 @@
 import re
 from src.ImageProcessingTools.ImageProcessingTool import ImageProcessingTool
-from PyQt5.QtWidgets import QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QComboBox, \
+from PyQt5.QtWidgets import QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, \
     QSlider, QLabel, QColorDialog, QFrame, QGraphicsOpacityEffect
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QColor, QTextCursor, QTextBlockFormat, QTextCharFormat, QFont, QIcon, QPixmap, QPainter
-from PyQt5.QtSvg import QSvgRenderer
+from PyQt5.QtGui import QTextCursor, QTextBlockFormat, QTextCharFormat, QFont, QPixmap
 from functools import partial
 from src.utils.image_rendering import *
 from src.components.FontComboBox import FontComboBox
@@ -39,7 +38,7 @@ class TextTool(ImageProcessingTool):
         self.is_strikethrough = False
 
     def create_ui(self):
-        """Create the button for the move tool."""
+        """Create the button for the text tool."""
         self.button = QPushButton()
         self.button.setIcon(create_svg_icon(f'{self.resources_path}/tool_button.svg'))
         self.button.setIconSize(QSize(36, 36))

@@ -58,6 +58,15 @@
                 "text_opacity": 1.0,
                 "placeholder": "Enter text here..."
             }
+        },
+        {
+            "name": "EraserTool",
+            "order": 5,
+            "options": {
+                "min_size": 1,
+                "max_size": 30,
+                "default_size": 10
+            }
         }
     ]
 }

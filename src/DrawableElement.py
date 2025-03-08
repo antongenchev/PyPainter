@@ -18,6 +18,7 @@ class DrawableElement():
         self.transformation = transformation # A linear transformation to apply when overlaying the element
         self.image = image # Image with the drawn element
         self.touch_mask = touch_mask # cv2 image with 1 channel with the same size as self.image
+        self.is_procedural = True # Whether the element can be defined/reconstructed from instructions
         self.size = size # The size of the image. Tuple[int, int] (h,w)
         self.offset = (0, 0) # The offset to apply before adding self.image to the layer's image
 

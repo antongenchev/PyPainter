@@ -8,7 +8,8 @@ env = [
 omit = [
     "src/config.py",
     "*GUI.py",
-    "*__init__.py"
+    "*__init__.py",
+    "tests/*"
 ]
 
 
