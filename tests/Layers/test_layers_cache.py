@@ -4,7 +4,6 @@ from src.Layers.LayersCache import LayersCache
 
 @pytest.fixture
 def cache():
-    print('aa')
     return LayersCache()
 
 def test_initialization(cache: LayersCache):
