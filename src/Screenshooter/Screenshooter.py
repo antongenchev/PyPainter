@@ -80,7 +80,7 @@ class Screenshooter:
                         int(self.gui.field_width.text()),
                         int(self.gui.field_height.text()))
         # Send the selection to the TransparentWindow
-        self.transparent_window.on_change_selection_from_screenshot_app(selection)
+        self.transparent_window.on_change_selection_from_gui(selection)
         # Update the image in the Zoomable label in PyPainter
         self.capture_image()
 

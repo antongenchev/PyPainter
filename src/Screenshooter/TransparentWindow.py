@@ -5,7 +5,7 @@ from PyQt5.QtGui import QPainter, QPen, QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QShortcut
 from src.Screenshooter.DraggableBox import DraggableBox
 from src.OverlayWidget import OverlayWidget
-from src.Memento import MementoTransparentWindow
+from src.Screenshooter.MementoTransparentWindow import MementoTransparentWindow
 from src.Caretaker import caretaker
 from src.utils.Box import Box
 from src.config import *
@@ -117,17 +117,17 @@ class TransparentWindow(QMainWindow):
                     self.mouseReleaseEvent(event, event_pos=event_pos)
         return super().eventFilter(obj, event)
 
-    def on_change_selection_from_screenshot_app(self, selection:Box):
+    def on_change_selection_from_gui(self, selection:Box):
         '''
         Handle the screenshot selection being updated from the main app. Update the selection
-        Do not send a signal back to the ScreenshotApp!
+        Do not send a signal back to the Screenshooter!
         Seave memento
 
         Parameters:
             selection: (Box) the left, top, width, height selection of the draggable widget
         '''
         self.draggable_widget.on_change_selection(selection)
-        self.save_memento(source='ScreenshotApp')
+        self.save_memento(source='Screenshooter')
 
     def update_draggable_widget(self):
         # Calculate the position and size of the new DraggableBox

@@ -27,14 +27,3 @@ class Memento:
             (bool) whether the two mementos are considered related
         '''
         return False
-
-class MementoTransparentWindow(Memento):
-    def is_related(self, m:'Memento') -> bool:
-        '''
-        If the source is the PyPainter and
-        '''
-        if self._source == 'PyPainter' and m._source == 'PyPainter':
-            # If the source PyPainter and the events happened quickly one after another they are related
-            if self._timestamp_created - m._timestamp_created < config['mementos']['time_limits']['MementoTransparentWindow']:
-                return True
-        return False
