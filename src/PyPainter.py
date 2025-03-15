@@ -5,6 +5,7 @@ from src.ImageProcessor import ImageProcessor
 from src.ImageProcessingToolSetting import ImageProcessingToolSetting
 from src.Screenshooter.mediator import ScreenshooterMediator
 from src.MenuBar.mediator import MenuBarMediator
+from src.Layout.LayoutManager import LayoutManager
 from mss import mss
 import cv2
 import numpy as np
@@ -41,30 +42,35 @@ class PyPainter(QWidget):
                          config['start_position']['width'],
                          config['start_position']['height'])
 
+        # Instantiate the LayoutManager
+        self.layout_manager = LayoutManager()
 
-        # The MenuBar / Navbar on top of the app
-        self.layout.setMenuBar(self.menu_bar.gui)
-
-        # Label to display the image
-        self.layout.addWidget(self.zoomable_widget)
-
-        # Image Processor sublayout
-        self.layout.addWidget(self.image_processor)
-
-        self.layout.addWidget(self.tool_settings_widget)
+        # Add widgets to their respective sublayouts.
+        if 'menu_bar' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['menu_bar'].addWidget(self.menu_bar.gui)
+        if 'canvas' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['canvas'].addWidget(self.zoomable_widget)
+        if 'tools' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['tools'].addWidget(self.image_processor)
+        if 'tool_settings' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['tool_settings'].addWidget(self.tool_settings_widget)
+        if 'screenshooter' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['screenshooter'].addWidget(self.screenshooter.gui)
 
         # Layer list GUI
         # self.layout.addWidget(self.image_processor.layer_list.gui)
 
-        # Screenshooter GUI
-        self.layout.addWidget(self.screenshooter.gui)
+        # # Screenshooter GUI
+        # self.layout.addWidget(self.screenshooter.gui)
 
-        h_layout2 = QHBoxLayout()
-        self.button_save = QPushButton('Save', self)
-        self.button_save.clicked.connect(self.on_save)
-        h_layout2.addWidget(self.button_save)
-        self.layout.addLayout(h_layout2)
+        # h_layout2 = QHBoxLayout()
+        # self.button_save = QPushButton('Save', self)
+        # self.button_save.clicked.connect(self.on_save)
+        # h_layout2.addWidget(self.button_save)
+        # self.layout.addLayout(h_layout2)
 
+        # Set the LayoutManager widget as the main content of PyPainter
+        self.layout.addWidget(self.layout_manager)
         self.setLayout(self.layout)
 
     def on_save(self):

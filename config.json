@@ -1,4 +1,52 @@
 {
+    "layout": {
+        "layouts": [
+            {
+                "width": 1920,
+                "height": 1080,
+                "areas": [
+                    {
+                        "name": "menu_bar",
+                        "size": { "height": 20}
+                    },
+                    {
+                        "name": "header",
+                        "type": "horizontal",
+                        "size": { "height": 50 }
+                    },
+                    {
+                        "name": "body",
+                        "type": "vertical",
+                        "stretch": 1,
+                        "children": [
+                            {
+                                "name": "tools",
+                                "type": "vertical"
+                            },
+                            {
+                                "name": "tool_settings",
+                                "type": "horizontal"
+                            },
+                            {
+                                "name": "canvas",
+                                "type": "vertical",
+                                "size": {
+                                    "width": 200,
+                                    "height": 300
+                                },
+                                "stretch": 1
+                              },
+                              {
+                                "name": "screenshooter",
+                                "type": "vertical",
+                                "stretch": 2
+                              }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
     "monitor": {
         "width": 1920,
         "height": 1080
