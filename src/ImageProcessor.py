@@ -40,7 +40,6 @@ class ImageProcessor(QWidget):
         self.tool_classes = {}
         self.layer_list = LayerList()
         self.fake_layer:FakeLayer = None # layer for visualising stuff not part of what is drawn
-        self.active_layer_index = 0 # the index of the active layer
 
         self.final_image = None # The final image after adding all the layers together
         self.canvas_shape: Tuple[int, int] = None # The shape of the layers, image, etc. but w/o 3rd term
@@ -160,7 +159,6 @@ class ImageProcessor(QWidget):
 
         # Add a layer with the image and set the active layer index
         self.layer_list.add_layer(Layer(image))
-        self.active_layer_index = 0
 
         # Initialize the fake layer with a zeroed image)
         empty_image = np.zeros((*self.canvas_shape, 4), dtype=np.uint8)
@@ -317,7 +315,7 @@ class ImageProcessor(QWidget):
         # Add the element to the current layer
         self.active_layer.add_element(drawable_element)
         self.render_element(drawable_element, redraw=False) # render the drawable element
-        self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
+        self.active_layer.final_image = self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
         # Add the layers together to get the final image
         self.render_layers()
 
@@ -350,9 +348,12 @@ class ImageProcessor(QWidget):
         # Update the final image
         self.render_layers()
 
-    def overlay_element_on_image(self, image:np.ndarray, drawable_element:DrawableElement) -> None:
+    def overlay_element_on_image(self, image:np.ndarray, drawable_element:DrawableElement):
         '''
-        Modify an image by overlaying a drawable_element on top of it. Take into account opacity
+        Modify an image by overlaying a drawable_element on top of it. Take into account opacity.
+        The image is modified in place and returned as modified. If the use case requires
+        for the original image to be unchanged you need to deepcopy the image before calling
+        this method, or add an `in_place` parameter to overlay_element_on_image.
 
         Parameters:
             image: an opencv image
@@ -374,6 +375,8 @@ class ImageProcessor(QWidget):
                               image[:, :, c] * image_alpha).astype(np.uint8)
         # Compute the final alpha channel
         image[:, :, 3] = ((overlay_alpha + (image[:, :, 3] / 255) * (1.0 - overlay_alpha)) * 255).astype(np.uint8)
+
+        return image
 
     def get_touch_element(self, x, y, r) -> DrawableElement:
         return self.active_layer.get_touched_element(x, y, r)

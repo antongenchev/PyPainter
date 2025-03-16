@@ -129,8 +129,19 @@ class LayerListGUI(QWidget):
         self.gui_mapping[layer.id]['image_label'] = image_label
         self.gui_mapping[layer.id]['item_widget'] = item_widget
 
+        # Connect signal from the layer to update the image
+        layer.layer_image_updated.connect(lambda: self.update_layer_image_in_gui(layer))
+
         # Add to scroll layout
         self.scroll_layout.insertWidget(index, item_widget)
+
+
+    def update_layer_image_in_gui(self, layer: Layer):
+        """Update the image representing the layer when its image is changed."""
+        if layer.id in self.gui_mapping:
+            image_label = self.gui_mapping[layer.id]['image_label']
+            qpixmap = cv2_to_qpixmap(layer.final_image).scaled(100, 75, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            image_label.setPixmap(qpixmap)
 
     def set_active_layer_in_gui(self, new_active_layer: Layer, previous_active_layer: Layer):
         '''

@@ -1,16 +1,21 @@
+from PyQt5.QtCore import pyqtSignal, QObject
 import numpy as np
 from typing import List, Union
 import copy
 from src.DrawableElement import DrawableElement
 from src.Layers.ElementListGUI import ElementListGUI
 
-class Layer:
+class Layer(QObject):
 
     _id_counter = 0 # Class variable to ensure unique IDs.
 
+    # Signals
+    layer_image_updated = pyqtSignal()
+
     def __init__(self, image=None, visible=True):
+        super().__init__()
         self.image = image # The starting image on which we draw
-        self.final_image = copy.deepcopy(image)
+        self._final_image = copy.deepcopy(image)
         self.visible = visible # Is the layer visible
         self.drawing_enabled = False
         self.elements:List[DrawableElement] = []
@@ -20,6 +25,17 @@ class Layer:
         Layer._id_counter += 1
 
         self.gui = ElementListGUI()
+
+    @property
+    def final_image(self) -> np.ndarray:
+        return self._final_image
+
+    @final_image.setter
+    def final_image(self, value):
+        self._final_image = value
+
+        # Send a signal notifying that the image has been changed
+        self.layer_image_updated.emit()
 
     def set_as_active(self) -> None:
         """
