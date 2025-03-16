@@ -10,11 +10,6 @@
                         "size": { "height": 50}
                     },
                     {
-                        "name": "header",
-                        "type": "horizontal",
-                        "size": { "height": 50 }
-                    },
-                    {
                         "name": "body",
                         "type": "vertical",
                         "stretch": 1,
@@ -28,19 +23,44 @@
                                 "type": "horizontal"
                             },
                             {
-                                "name": "canvas",
-                                "type": "vertical",
-                                "size": {
-                                    "width": 300,
-                                    "height": 300
-                                },
-                                "stretch": 1
-                              },
-                              {
-                                "name": "screenshooter",
-                                "type": "vertical",
-                                "stretch": 1
-                              }
+                                "name": "main_part",
+                                "type": "horizontal",
+                                "stretch":1,
+                                "children": [
+                                    {
+                                        "name": "canvas",
+                                        "type": "vertical",
+                                        "size": {
+                                            "width": 700,
+                                            "height": 500
+                                        },
+                                        "stretch": 1
+                                    },
+                                    {
+                                        "name": "right_of_canvas",
+                                        "type":"vertical",
+                                        "children": [
+                                            {
+                                                "name": "screenshooter",
+                                                "type": "vertical",
+                                                "size": {
+                                                    "width": 240,
+                                                    "height": 180
+                                                }
+                                            },
+                                            {
+                                                "name": "layers_gui",
+                                                "type": "vertical",
+                                                "size": {
+                                                    "width": 240,
+                                                    "height": 300
+                                                },
+                                                "stretch": 1
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     }
                 ]

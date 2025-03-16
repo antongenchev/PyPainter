@@ -99,7 +99,7 @@ class LayerListGUI(QWidget):
         image_label.setStyleSheet("border: 4px solid #ccc; border-radius: 3px;")
         image_label.clicked.connect(lambda: self.on_image_clicked(layer))
 
-        # Small Button (e.g., "Remove" or "Options")
+        # Button for toggling visibility
         button_eye = QPushButton()
         button_eye.setIcon(self.icon_eye_enable)
         button_eye.setIconSize(QSize(24, 24))

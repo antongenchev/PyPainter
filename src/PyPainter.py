@@ -56,12 +56,8 @@ class PyPainter(QWidget):
             self.layout_manager.layer_guis['tool_settings'].addWidget(self.tool_settings_widget)
         if 'screenshooter' in self.layout_manager.layer_guis:
             self.layout_manager.layer_guis['screenshooter'].addWidget(self.screenshooter.gui)
-
-        # Layer list GUI
-        # self.layout.addWidget(self.image_processor.layer_list.gui)
-
-        # # Screenshooter GUI
-        # self.layout.addWidget(self.screenshooter.gui)
+        if 'layers_gui' in self.layout_manager.layer_guis:
+            self.layout_manager.layer_guis['layers_gui'].addWidget(self.image_processor.layer_list.gui)
 
         # h_layout2 = QHBoxLayout()
         # self.button_save = QPushButton('Save', self)

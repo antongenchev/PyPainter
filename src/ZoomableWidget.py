@@ -34,7 +34,6 @@ class ZoomableWidget(QWidget):
 
         # Create the ZoomableLabel
         self.zoomable_label = ZoomableLabel(self)
-        self.zoomable_label.setFixedSize(600, 400)  # Set some default size
         self.zoomable_label.setStyleSheet("border: 1px solid black")
         layout.addWidget(self.zoomable_label)
 
