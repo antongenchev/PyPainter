@@ -1,8 +1,8 @@
-import cv2
 import numpy as np
 from typing import List, Union
 import copy
 from src.DrawableElement import DrawableElement
+from src.Layers.ElementListGUI import ElementListGUI
 
 class Layer:
 
@@ -18,7 +18,20 @@ class Layer:
         # Assign a unqiue id to the layer
         self.id = Layer._id_counter
         Layer._id_counter += 1
-        print('layer_id', self.id)
+
+        self.gui = ElementListGUI()
+
+    def set_as_active(self) -> None:
+        """
+        There is one active layer, i.e. the layer that we are
+        currently working on. This method sets the Layer as the active
+        layer and tries to shows its ElementListGUI.
+        """
+        self.gui.set_as_active()
+
+    def set_as_inactive(self) -> None:
+        """Set the layer as inactive and try ot hide its ElementListGUI."""
+        self.gui.set_as_inactive()
 
     def toggle_visibility(self):
         self.visible = not self.visible
@@ -62,7 +75,6 @@ class Layer:
             DrawablElement: return the topmost drawable element that was clicked.
                 If there is no such element return None
         '''
-        print('[Layer] get_touched_element', self)
         for element in reversed(self.elements):
             if element.is_touched(x, y, r):
                 return element

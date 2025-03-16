@@ -93,7 +93,13 @@ class LayerList:
         '''
         previously_active_layer = self.layer_list[self.active_layer_idx]
         self.active_layer_idx = self.get_layer_idx(layer)
+
+        # Set the active layer in the GUI
         self.gui.set_active_layer_in_gui(layer, previously_active_layer)
+
+        # Notify the previous active layer that it is no longer active
+        previously_active_layer.set_as_inactive()
+        self.active_layer.set_as_active()
 
     def delete_layer(self, layer: Layer):
         '''
