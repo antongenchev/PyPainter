@@ -21,8 +21,7 @@ class ImageProcessingTool(metaclass=ToolMetaClass):
         self.resources_path = f'resources/tools/{self.__class__.__name__}'
 
         # Load the part of the config file responsible for the tool
-        self.config = {}
-        self.load_config()
+        self.config = self.load_config()
 
     def create_ui(self):
         """Create the UI elements for this tool."""
@@ -63,7 +62,7 @@ class ImageProcessingTool(metaclass=ToolMetaClass):
     def is_enabled(self) -> bool:
         return self.drawing_enabled
 
-    def load_config(self):
+    def load_config(self) -> dict:
         '''
         Get the config for the this tool. That is:
         self.config = config['tools']['<current tool>']
@@ -73,7 +72,9 @@ class ImageProcessingTool(metaclass=ToolMetaClass):
         for config_tool in config_tools:
             if self.__class__.__name__ == config_tool['name']:
                 self.config = config_tool
-                break
+                return self.config
+        # Default to an empty dict if config section is not found.
+        return {}
 
     def create_drawable_element(self,
                                 instructions:dict={},
