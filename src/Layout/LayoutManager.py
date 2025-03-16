@@ -53,11 +53,12 @@ class LayoutManager(QWidget):
         # Pick the layout configuration that best matches current dimensions
         self.selected_layout_config = self.choose_layout_config(current_width, current_height)
 
-        # Create the layout
-        main_layout = self.create_layout_from_config(self.selected_layout_config.get("areas", []), "vertical")
+        # Create the layout container widget
+        main_widget = self.create_layout_from_config(self.selected_layout_config.get("areas", []), "vertical")
 
-        # main_layout = QHBoxLayout()
-        # main_layout.addWidget(QLabel('asddf'))
+        # Create a new layout and add main_widget
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(main_widget)
 
         self.setLayout(main_layout)
 
@@ -65,42 +66,50 @@ class LayoutManager(QWidget):
         '''
         Recursively create layouts from a list of area defintions.
         '''
+        container = QWidget()  # This will hold the layout
         layout = QVBoxLayout() if parent_type == 'vertical' else QHBoxLayout()
+        container.setLayout(layout)
+
+        # Set margins and padding to 0
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         for area in areas:
             area_type = area.get('type', 'vertical')
-            sublayout = QVBoxLayout() if area_type == 'vertical' else QHBoxLayout()
+            sub_container = QWidget()
 
-            placeholder = QWidget()
+            sub_layout = QVBoxLayout() if area_type == 'vertical' else QHBoxLayout()
+            # Set margins and padding to 0
+            sub_layout.setContentsMargins(0, 0, 0, 0)
+            sub_layout.setSpacing(0)
+
+            sub_container.setLayout(sub_layout)
 
             # Set size policy if needed
             if 'size' in area:
                 size_info = area['size']
                 if 'width' in size_info:
-                    placeholder.setFixedWidth(size_info['width'])
+                    sub_container.setFixedWidth(size_info['width'])
                 if 'height' in size_info:
-                    placeholder.setFixedHeight(size_info['height'])
-                placeholder.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                    sub_container.setFixedHeight(size_info['height'])
+                sub_container.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             else:
-                # Let it expand by default
-                placeholder.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                sub_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
             # If there are nested areas, recursively build the nested layout
             if 'children' in area:
-                nested_layout = self.create_layout_from_config(area['children'], area_type)
-                placeholder.setLayout(nested_layout)
-
-            sublayout.addWidget(placeholder)
+                nested_container = self.create_layout_from_config(area['children'], area_type)
+                sub_layout.addWidget(nested_container)  # Add nested layout container
 
             # Save a reference to this sublayout for future modifications
-            self.layer_guis[area.get('name', 'default')] = sublayout
+            self.layer_guis[area.get('name', 'default')] = sub_layout
 
             # Use a stretch factor if provided (default 0 means no stretch)
             stretch = area.get('stretch', 0)
 
-            layout.addLayout(sublayout, stretch)
+            layout.addWidget(sub_container, stretch)
 
-        return layout
+        return container  # Return the top-level container widget
 
     def resizeEvent(self, event):
         # TODO

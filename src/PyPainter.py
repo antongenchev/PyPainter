@@ -49,7 +49,7 @@ class PyPainter(QWidget):
         if 'menu_bar' in self.layout_manager.layer_guis:
             self.layout_manager.layer_guis['menu_bar'].addWidget(self.menu_bar.gui)
         if 'canvas' in self.layout_manager.layer_guis:
-            self.layout_manager.layer_guis['canvas'].addWidget(self.zoomable_widget)
+            self.layout_manager.layer_guis['canvas'].addWidget(self.zoomable_widget, stretch=1)
         if 'tools' in self.layout_manager.layer_guis:
             self.layout_manager.layer_guis['tools'].addWidget(self.image_processor)
         if 'tool_settings' in self.layout_manager.layer_guis:

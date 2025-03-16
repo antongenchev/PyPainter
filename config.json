@@ -7,7 +7,7 @@
                 "areas": [
                     {
                         "name": "menu_bar",
-                        "size": { "height": 20}
+                        "size": { "height": 50}
                     },
                     {
                         "name": "header",
@@ -31,7 +31,7 @@
                                 "name": "canvas",
                                 "type": "vertical",
                                 "size": {
-                                    "width": 200,
+                                    "width": 300,
                                     "height": 300
                                 },
                                 "stretch": 1
@@ -39,7 +39,7 @@
                               {
                                 "name": "screenshooter",
                                 "type": "vertical",
-                                "stretch": 2
+                                "stretch": 1
                               }
                         ]
                     }
