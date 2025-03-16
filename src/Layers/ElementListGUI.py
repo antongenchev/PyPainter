@@ -4,7 +4,7 @@ from collections import defaultdict
 import os
 from src.DrawableElement import DrawableElement
 from src.Layout.LayoutManager import LayoutManager
-from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
+from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon, overlay_pixmap_on_checkerboard
 
 class ElementListGUI(QWidget):
 
@@ -32,10 +32,10 @@ class ElementListGUI(QWidget):
         # Scroll Area
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFixedSize(500, 200)
+        self.scroll_area.setFixedSize(500, 140)
         self.scroll_container = QWidget()
         self.scroll_layout = QHBoxLayout(self.scroll_container)
-        self.scroll_layout.setAlignment(Qt.AlignLeft)
+        self.scroll_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.scroll_area.setWidget(self.scroll_container)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -52,6 +52,7 @@ class ElementListGUI(QWidget):
         '''
         # Get the qpixmap image representing the element
         qpixmap = cv2_to_qpixmap(element.image).scaled(100, 75, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        qpixmap = overlay_pixmap_on_checkerboard(qpixmap, 100, 75)
 
         item_widget = QWidget()
         item_layout = QGridLayout(item_widget)
