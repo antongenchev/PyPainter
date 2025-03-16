@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QHBoxLayout, QGridLayout, QWidget, QLabel, QMenu, QPushButton, QScrollArea
+from PyQt5.QtWidgets import QHBoxLayout, QGridLayout, QWidget, QLabel, QMenu, QPushButton, QScrollArea, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from collections import defaultdict
 import os
@@ -35,7 +35,9 @@ class ElementListGUI(QWidget):
         self.scroll_area.setFixedSize(500, 140)
         self.scroll_container = QWidget()
         self.scroll_layout = QHBoxLayout(self.scroll_container)
+
         self.scroll_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.scroll_layout.setSpacing(10)
         self.scroll_area.setWidget(self.scroll_container)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -55,9 +57,10 @@ class ElementListGUI(QWidget):
         qpixmap = overlay_pixmap_on_checkerboard(qpixmap, 100, 75)
 
         item_widget = QWidget()
+        item_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
         item_layout = QGridLayout(item_widget)
         item_layout.setContentsMargins(0, 0, 0, 0)
-        item_layout.setSpacing(0)
 
         # Clickable Image Label
         image_label = ClickableElementLabel(element_list_gui=self, element=element)
