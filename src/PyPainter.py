@@ -90,3 +90,6 @@ class PyPainter(QWidget):
         Update the image in the zoomable_widget
         '''
         self.zoomable_widget.zoomable_label.setImage(image)
+
+        # Set the active layer as the only layer in the layer_list
+        self.image_processor.set_active_layer(self.image_processor.layer_list.layer_list[0])
