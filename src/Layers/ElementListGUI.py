@@ -100,9 +100,13 @@ class ElementListGUI(QWidget):
     def set_as_active(self):
         """Show the GUI for this layer and hide the previous if such is shown."""
         LayoutManager().layer_guis['element_list_gui'].addWidget(self)
+        self.show()
 
     def set_as_inactive(self):
         """Hide the GUI."""
+        container_layout = LayoutManager().layer_guis['element_list_gui']
+        container_layout.removeWidget(self)
+        self.hide()
 
     def on_image_clicked(self, element):
         """Handles clicks on the element image in the element list gui"""
