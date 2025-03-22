@@ -5,6 +5,8 @@ import os
 from src.DrawableElement import DrawableElement
 from src.Layout.LayoutManager import LayoutManager
 from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon, overlay_pixmap_on_checkerboard
+from src.Layers.ElementListEmitter import element_list_emitter
+
 
 class ElementListGUI(QWidget):
 
@@ -135,8 +137,7 @@ class ElementListGUI(QWidget):
         else:
             button_eye.setIcon(self.icon_eye_disable)
         # Emit a signal with the new visibility state of the layer.
-        self.element_visibility_toggled.emit(element, new_visibility_state)
-
+        element_list_emitter.toggle_visibility(element.id, new_visibility_state)
 
 
 class ClickableElementLabel(QLabel):
