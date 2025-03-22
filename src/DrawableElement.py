@@ -13,7 +13,7 @@ class DrawableElement():
         self.id = None # Unique id for the drawable element
         self.tool = tool_name # The tool which has created the drawable element
         self.z_index = None # The z-index of the element
-        self.visible = None # bool
+        self.visible = True # bool
         self.instructions = instructions # The instructions used by the Tool to draw the element
         self.transformation = transformation # A linear transformation to apply when overlaying the element
         self.image = image # Image with the drawn element

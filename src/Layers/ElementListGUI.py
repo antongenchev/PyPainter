@@ -132,12 +132,13 @@ class ElementListGUI(QWidget):
         '''
         print('[GUI] on_eye_clicked')
         new_visibility_state = not element.visible
+        print(new_visibility_state, element)
         if new_visibility_state:
             button_eye.setIcon(self.icon_eye_enable)
         else:
             button_eye.setIcon(self.icon_eye_disable)
         # Emit a signal with the new visibility state of the layer.
-        element_list_emitter.toggle_visibility(element.id, new_visibility_state)
+        element_list_emitter.toggle_visibility(element, new_visibility_state)
 
 
 class ClickableElementLabel(QLabel):

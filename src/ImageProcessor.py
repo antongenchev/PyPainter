@@ -9,13 +9,14 @@ import importlib
 import copy
 from typing import List, Tuple
 from scipy.interpolate import CubicSpline
+
 from src.ZoomableLabel import ZoomableLabel
 from src.ZoomableWidget import ZoomableWidget
 from src.Layers.Layer import FakeLayer
 from src.Layers.Layer import Layer
 from src.Layers.LayerList import LayerList
+from src.Layers.ElementListEmitter import element_list_emitter
 from src.DrawableElement import DrawableElement
-from src.config import config
 
 from src.ImageProcessingToolSetting import ImageProcessingToolSetting
 # Import ImageProcessingTools
@@ -78,6 +79,8 @@ class ImageProcessor(QWidget):
         self.layer_list.gui.layer_moved_to_top.connect(self.move_layer_to_top)
         self.layer_list.gui.layer_inserted_above.connect(lambda l: self.insert_empty_layer(l, True))
         self.layer_list.gui.layer_inserted_below.connect(lambda l: self.insert_empty_layer(l, False))
+
+        element_list_emitter.visibility_toggled.connect(lambda e, v: self.set_element_visibility(e, v))
 
     def update_zoomable_label(self):
         '''
@@ -302,6 +305,11 @@ class ImageProcessor(QWidget):
     ###################
     # Element methods #
     ###################
+
+    def set_element_visibility(self, element: DrawableElement, is_visible: bool) -> None:
+        print('[TOGGLE ELEMENT VISIBILITY]', element)
+        element.visible = is_visible
+        self.render_layers()
 
     def render_element(self, drawable_element:DrawableElement, redraw:bool) -> None:
         if (not redraw) and drawable_element.image is not None:
