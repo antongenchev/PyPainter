@@ -69,7 +69,7 @@ class ImageProcessor(QWidget):
 
     def connect_signals(self):
         '''
-        Connect the signals / events coming from GUI parts to methods of the image processort.
+        Connect the signals / events coming from GUI parts to methods of the image processor.
         '''
         self.layer_list.gui.layer_added.connect(self.add_layer)
         self.layer_list.gui.layer_visibility_toggled.connect(self.set_layer_visibility)
