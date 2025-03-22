@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QHBoxLayout, QGridLayout, QWidget, QLabel, QMenu, QPushButton, QScrollArea, QSizePolicy
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QTimer
 from collections import defaultdict
 import os
 from src.DrawableElement import DrawableElement
@@ -96,6 +96,13 @@ class ElementListGUI(QWidget):
 
         # Add to scroll layout
         self.scroll_layout.insertWidget(index, item_widget)
+        self.scroll_to_the_rightmost_element()
+
+    def scroll_to_the_rightmost_element(self):
+        # Delay scrolling until after the layout is updated
+        QTimer.singleShot(50, lambda: self.scroll_area.horizontalScrollBar().setValue(
+            self.scroll_area.horizontalScrollBar().maximum()
+        ))
 
     def set_as_active(self):
         """Show the GUI for this layer and hide the previous if such is shown."""

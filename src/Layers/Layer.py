@@ -63,7 +63,7 @@ class Layer(QObject):
         self.elements.append(element) # add the drawable element
 
         # Inform the GUI about the added element
-        self.gui.add_element_in_gui(element)
+        self.gui.add_element_in_gui(element, index=-1)
 
     def remove_element(self, index:int) -> None:
         if 0 <= index < len(self.elements):
