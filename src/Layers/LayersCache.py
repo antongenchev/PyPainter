@@ -107,6 +107,92 @@ class LayersCache:
 
         return optimal_covers[-1][1]
 
+    def get_overlay_instructions(self, layers_tuple: Tuple[int]) -> List[Tuple]:
+        """
+        Generate instructions for overlaying caches and single layers
+        which when executed will produce the required layers_tuple.
+        The instructions are first optimized for the lowest possible
+        number of overlays and then overlays that result in smaller
+        tuples are prioritized. The latter optimization helps generate
+        a more cache coverage of the layers_tuple.
+
+        Args:
+            layers_tuple (Tuple[int]): The set of layers which need to
+                be rendered.
+        Returns:
+            List[Tuple[Tuple[int], Tuple[int]]]: The returned list of
+                instructions consists of tuples of length 2 with both
+                entries being layer tuples that are in the cache or
+                integers representing single layers. E.g. ((2,3),(5)) is
+                saying "overlay layer 5 on the image for (2,3)".
+        """
+        # Get the list of building blocks e.g. [(1), (2), (3, 4)]
+        calculated = insert_missing_layers(layers_tuple, self.get_precalculated(layers_tuple))
+        instructions = []
+
+        # Combie the building blocks until we have only one block
+        size_aim = 1  # The len of the result of combining blocks
+        while len(calculated) > 1:
+            size_aim += 1  # Increase the aimed sized
+            j = 0
+            while j < len(calculated) - 1:
+                if len(calculated[j]) + len(calculated[j+1]) == size_aim:
+                    # Combine the blocks to get a bigger block.
+                    instructions.append((calculated[j], calculated[j+1]))
+                    calculated.insert(j, (*calculated[j], *calculated[j+1]))
+                    calculated.pop(j + 1)
+                    calculated.pop(j + 1)
+                j += 1
+
+        return instructions
+
+
+def insert_missing_layers(t: Tuple[int], l: List[Tuple[int]]) -> List[Tuple[int]]:
+    """
+    Given a tuple (a0,...,an) with {ai} ascending and a list of disjoint
+    tuples [(ak,...,a(k+l)),...] with k, k+l in 0,...,n fill the missing
+    integers in the list using singleton tuples.
+
+    Args:
+        t (Tuple[int]): A tuple with ascending integers
+        l (List[Tuple[int]])): A list of tuples such that the numbers in
+            each tuple are ascending and the last number of any tuple is
+            less than the first number of the next tuple.
+    Returns:
+        List[Tuple[int]]: The same as the list `l` but with gaps
+            filled by singleton tuples. So that any integer found in t
+            is also found in the result.
+    Example:
+        >>> t = (1, 2, 4, 8, 16)
+        >>> l = [(1, 2), (8, 16)]
+        >>> insert_missing_layers(t, l)
+        [(1, 2), (4,), (8, 16)]
+    """
+    result = []
+    i = 0  # pointer for t
+
+    for group in l:
+        while i < len(t) and t[i] < group[0]:
+            # Add integers that should be before the tuple.
+            result.append((t[i],))
+            i += 1
+
+        # Check that the sequence from the group matches the tuple
+        group_len = len(group)
+        if t[i:i+group_len] == group:
+            result.append(group)
+            i += group_len
+        else:
+            raise ValueError
+
+    # Append remaining integers at the end
+    while i < len(t):
+        result.append((t[i],))
+        i += 1
+
+    return result
+
+
 
 def find_last_non_overlapping_interval(idx: int, intervals: List[int]) -> int:
     '''

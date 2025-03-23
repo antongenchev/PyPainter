@@ -69,3 +69,32 @@ def test_get_precalculated_overlapping_choices(cache: LayersCache):
     result = cache.get_precalculated((1, 2, 3, 4, 5, 6))
     expected = [(1, 2, 3), (4, 5, 6)]
     assert set(result) == set(expected)
+
+def test_get_instructions(cache: LayersCache):
+    """Test that a single-layer request returns an empty instruction list."""
+    result = cache.get_overlay_instructions((1,))
+    assert result == []
+
+
+def test_get_overlay_instructions_no_cache(cache: LayersCache):
+    """Test when no cache is available, each layer is treated separately."""
+    result = cache.get_overlay_instructions((1, 2, 3))
+    expected = [((1,), (2,)), ((1, 2), (3,))]
+    assert result == expected
+
+def test_get_overlay_instructions_with_cache(cache: LayersCache):
+    """Test when cache has some precomputed layers available."""
+    cache.add_cache((1, 2), "data1")
+    cache.add_cache((3,), "data2")
+    result = cache.get_overlay_instructions((1, 2, 3))
+    expected = [((1, 2), (3,))]
+    assert result == expected
+
+def test_get_overlay_instructions_complex(cache: LayersCache):
+    """Test with more complex combinations and multiple cached layers."""
+    cache.add_cache((1, 2), "data1")
+    cache.add_cache((3, 4), "data2")
+    cache.add_cache((5,), "data3")
+    result = cache.get_overlay_instructions((1, 2, 3, 4, 5))
+    expected = [((3, 4), (5,)), ((1, 2), (3,4,5))]
+    assert result == expected
