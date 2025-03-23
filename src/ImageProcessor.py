@@ -309,35 +309,39 @@ class ImageProcessor(QWidget):
     def set_element_visibility(self, element: DrawableElement, is_visible: bool) -> None:
         print('[TOGGLE ELEMENT VISIBILITY]', element)
         element.visible = is_visible
-        self.render_layers()
+        # TODO implement rererendering after toggle visibility
 
-    def render_element(self, drawable_element:DrawableElement, redraw:bool) -> None:
-        if (not redraw) and drawable_element.image is not None:
+    def render_element(self, element: DrawableElement, redraw: bool) -> None:
+        if (not redraw) and element.image is not None:
             # Do not redraw if the image is already drawn
             return
-        tool_name = drawable_element.tool
+        tool_name = element.tool
         tool_obj = self.tool_manager.tools[tool_name]['object']
-        tool_obj.draw_drawable_element(drawable_element)
+        tool_obj.draw_drawable_element(element)
 
-    def add_element(self, drawable_element:DrawableElement):
+    def add_element(self, element:DrawableElement):
         # Add the element to the current layer
-        self.active_layer.add_element(drawable_element)
-        self.render_element(drawable_element, redraw=False) # render the drawable element
-        self.active_layer.final_image = self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
+        self.active_layer.add_element(element)
+        self.render_element(element, redraw=False) # render the drawable element
+        self.active_layer.final_image = self.overlay_element_on_image(self.active_layer.final_image, element)
         # Add the layers together to get the final image
         self.render_layers()
 
-    def apply_element_transformation(self, drawable_element:DrawableElement) -> None:
+    def delete_element(self, element: DrawableElement):
+        """Delete an element"""
+        print(f'[ImageProcessr] Delete Element {element}. TODO') #TODO
+
+    def apply_element_transformation(self, element:DrawableElement) -> None:
         '''
-        This function applies the transformation of a drawable_element and redraws the layer which contains it.
+        This function applies the transformation of a element and redraws the layer which contains it.
         The drawable element must be in the active layer.
 
         Args:
-            drawable_element (DrawableElement): The drawable_element. It must be in the elements list of the
+            element (DrawableElement): The element. It must be in the elements list of the
                 currently active layer.
         '''
         # Find the index of the updated drawable element
-        element_index = self.active_layer.get_element_index(drawable_element)
+        element_index = self.active_layer.get_element_index(element)
 
         # Render everything below the chosen drawable element
         image_below = self.render_partial_layer(self.active_layer, 0, end_index=element_index)
@@ -350,28 +354,28 @@ class ImageProcessor(QWidget):
         # Combine image_below, the drawable element, and image_above to get the final image
         self.active_layer.final_image = copy.deepcopy(self.active_layer.image)
         self.active_layer.final_image = self.overlay_images(self.active_layer.final_image, image_below)
-        self.overlay_element_on_image(self.active_layer.final_image, drawable_element)
+        self.overlay_element_on_image(self.active_layer.final_image, element)
         self.active_layer.final_image = self.overlay_images(self.active_layer.final_image, image_above)
 
         # Update the final image
         self.render_layers()
 
-    def overlay_element_on_image(self, image:np.ndarray, drawable_element:DrawableElement):
+    def overlay_element_on_image(self, image:np.ndarray, element:DrawableElement):
         '''
-        Modify an image by overlaying a drawable_element on top of it. Take into account opacity.
+        Modify an image by overlaying a element on top of it. Take into account opacity.
         The image is modified in place and returned as modified. If the use case requires
         for the original image to be unchanged you need to deepcopy the image before calling
         this method, or add an `in_place` parameter to overlay_element_on_image.
 
         Parameters:
             image: an opencv image
-            drawable_element: A drawable element that has already been rendered.
+            element: A drawable element that has already been rendered.
                 If the drawable element has an affine transformation it will be applied when overlayig it
         '''
         # Get the transformation
-        transformation = drawable_element.get_transformation()
+        transformation = element.get_transformation()
         # Apply the affine transformation
-        transformed_element_img = cv2.warpAffine(drawable_element.image,
+        transformed_element_img = cv2.warpAffine(element.image,
                                                  transformation,
                                                  (image.shape[1], image.shape[0]))
 
