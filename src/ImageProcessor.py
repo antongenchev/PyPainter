@@ -266,7 +266,7 @@ class ImageProcessor(QWidget):
         '''
         # Get optimised instructions for overlaying the layers.
         layers_to_render = tuple(
-            i for i, _ in enumerate((l for l in self.layer_list if l.visible))
+            i for i, l in enumerate(self.layer_list) if l.visible
         )
         overlay_instructions = self.layer_list.cache.get_overlay_instructions(layers_to_render)
 
