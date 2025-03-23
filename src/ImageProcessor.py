@@ -282,11 +282,11 @@ class ImageProcessor(QWidget):
             if len(instr[0]) == 1:
                 img_bottom = self.layer_list[instr[0][0]].final_image
             else:
-                self.layer_list.cache[instr[0]]
-            if len(instr[0]) == 1:
+                img_bottom = self.layer_list.cache[instr[0]]
+            if len(instr[1]) == 1:
                 img_top = self.layer_list[instr[1][0]].final_image
             else:
-                self.layer_list.cache[instr[1]]
+                img_top =self.layer_list.cache[instr[1]]
             # Overlay the two images
             img = self.overlay_images(img_bottom, img_top)
             self.layer_list.cache.add_cache((*instr[0], *instr[1]), img)
