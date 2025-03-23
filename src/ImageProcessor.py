@@ -1,6 +1,4 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import pyqtSignal, QTimer
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import cv2
 import numpy as np
@@ -8,9 +6,7 @@ from enum import IntEnum, auto
 import importlib
 import copy
 from typing import List, Tuple
-from scipy.interpolate import CubicSpline
 
-from src.ZoomableLabel import ZoomableLabel
 from src.ZoomableWidget import ZoomableWidget
 from src.Layers.Layer import FakeLayer
 from src.Layers.Layer import Layer
@@ -268,16 +264,34 @@ class ImageProcessor(QWidget):
         '''
         Render all layers
         '''
-        self.final_image = None
-        for layer in (l for l in self.layer_list if l.visible):
-            if self.final_image is None:
-                self.final_image = layer.final_image
-                continue
-            self.final_image = self.overlay_images(self.final_image, layer.final_image)
+        # Get optimised instructions for overlaying the layers.
+        layers_to_render = tuple(
+            i for i, _ in enumerate((l for l in self.layer_list if l.visible))
+        )
+        overlay_instructions = self.layer_list.cache.get_overlay_instructions(layers_to_render)
 
-        # If there is no final_image to be drawn then draw empty canvas
-        if self.final_image is None:
-            self.final_image = np.zeros((*self.canvas_shape, 4))
+        # Handle special case of rendering only one layer
+        if len(layers_to_render) == 1:
+            self.final_image = self.layer_list[layers_to_render[0]].final_image
+            self.update_zoomable_label()
+            return
+
+        # Execute the instructions overlaying the layers.
+        for instr in overlay_instructions:
+            # Get the images to overlay from the cache or the layers.
+            if len(instr[0]) == 1:
+                img_bottom = self.layer_list[instr[0][0]].final_image
+            else:
+                self.layer_list.cache[instr[0]]
+            if len(instr[0]) == 1:
+                img_top = self.layer_list[instr[1][0]].final_image
+            else:
+                self.layer_list.cache[instr[1]]
+            # Overlay the two images
+            img = self.overlay_images(img_bottom, img_top)
+            self.layer_list.cache.add_cache((*instr[0], *instr[1]), img)
+
+        self.final_image = self.layer_list.cache[layers_to_render]
 
         self.update_zoomable_label()
 

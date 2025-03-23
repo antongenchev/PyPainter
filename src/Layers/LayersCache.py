@@ -13,6 +13,11 @@ class LayersCache:
     def __init__(self):
         self.cache = {}
 
+    def __getitem__(self, key: Tuple[int]) -> str:
+        if key in self.cache:
+            return self.cache[key]['data']
+        raise KeyError(f"Layers {key} not found in cache.")
+
     def add_cache(self, layers_tuple: Tuple[int], precompiled_data: Any) -> None:
         '''
         Add a cached / precompiled data (e.g. cv2 image) for the layers in the layers_tuple

@@ -1,14 +1,7 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QListWidget,
-                             QListWidgetItem, QLabel, QScrollArea,
-                             QPushButton, QHBoxLayout, QGridLayout,
-                             QMenu, QAction)
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from src.Layers.Layer import Layer
+from src.Layers.LayersCache import LayersCache
 from src.Layers.LayerListGUI import LayerListGUI
-from src.utils.image_rendering import cv2_to_qpixmap, create_svg_icon
-import cv2
-import os
+
 
 class LayerList:
     def __init__(self):
@@ -17,6 +10,8 @@ class LayerList:
 
         self.layer_list = []
         self.active_layer_idx: int = None
+
+        self.cache = LayersCache()
 
         self.gui = LayerListGUI()
 
