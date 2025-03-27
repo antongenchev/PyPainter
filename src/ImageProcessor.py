@@ -260,9 +260,25 @@ class ImageProcessor(QWidget):
             self.overlay_element_on_image(image, layer.elements[i])
         return image
 
+    def render_layer(self, layer: Layer) -> None:
+        '''
+        Render a single layer and update the zoomable widget.
+        This function does not update the zoomable widget after rendering
+        the layer. It just sets the final_image attribute of the layer.
+
+        Args:
+            layer (Layer): The layer that is to be rendered.
+        Returns:
+            None: The function does not return anything but instead
+                updates the final_image attribute of the given layer.
+        '''
+
+
+
+
     def render_layers(self):
         '''
-        Render all layers
+        Render all layers and update the zoomable widget.
         '''
         # Get optimised instructions for overlaying the layers.
         layers_to_render = tuple(
